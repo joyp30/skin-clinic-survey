@@ -423,11 +423,13 @@ export function getStepsForProcedure(procedure: string): SurveyStep[] {
       break;
   }
 
+  /*
   steps.push({
     title: '외모 고민 설문',
     subtitle: '시술 만족도를 높이기 위해 고객님의 평소 생각을 여쭤봅니다',
     questions: bddqQuestions,
   });
+  */
 
   steps.push({
     title: '피부 상태 확인',
