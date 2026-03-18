@@ -7,7 +7,7 @@ import {
   liftingQuestions,
 } from '@/data/questionData';
 
-const procedureNames: Record<ProcedureType, string> = {
+const procedureNames: Record<string, string> = {
   botox: '보톡스',
   filler: '필러',
   laser: '레이저',
@@ -28,14 +28,14 @@ export function generateCrmText(data: SurveyFormData): string {
   });
 
   // Procedure-specific warnings
-  const procQuestions =
-    data.procedure === 'botox'
-      ? botoxQuestions
-      : data.procedure === 'filler'
-        ? fillerQuestions
-        : data.procedure === 'laser'
-          ? laserQuestions
-          : liftingQuestions;
+  const procedureArray = data.procedure ? data.procedure.split(',').map(p => p.trim()) : [];
+  const procQuestions: any[] = [];
+  procedureArray.forEach(p => {
+    if (p === 'botox') procQuestions.push(...botoxQuestions);
+    else if (p === 'filler') procQuestions.push(...fillerQuestions);
+    else if (p === 'laser') procQuestions.push(...laserQuestions);
+    else if (p === 'lifting') procQuestions.push(...liftingQuestions);
+  });
 
   procQuestions.forEach((q) => {
     if (q.warningOn && data[q.id] === q.warningOn && q.warningMessage) {
@@ -53,23 +53,22 @@ export function generateCrmText(data: SurveyFormData): string {
   }
 
   // --- [시술] Procedure info ---
-  const procedureName = procedureNames[data.procedure] || data.procedure;
-  let procedureDetail = `${procedureName}`;
+  const procNames = data.procedure
+    ? data.procedure.split(',').map(p => procedureNames[p.trim()] || p).join(', ')
+    : '';
+  let procedureDetail = `${procNames}`;
   if (data.procedureDetail) {
     procedureDetail += ` - ${data.procedureDetail}`;
   }
 
   // Procedure area
-  const areaField =
-    data.procedure === 'botox'
-      ? data.botoxArea
-      : data.procedure === 'filler'
-        ? data.fillerArea
-        : data.procedure === 'lifting'
-          ? data.liftingArea
-          : '';
-  if (areaField) {
-    procedureDetail += ` (${areaField})`;
+  const areaParts: string[] = [];
+  if (data.botoxArea) areaParts.push(`보톡스: ${data.botoxArea}`);
+  if (data.fillerArea) areaParts.push(`필러: ${data.fillerArea}`);
+  if (data.liftingArea) areaParts.push(`리프팅: ${data.liftingArea}`);
+  
+  if (areaParts.length > 0) {
+    procedureDetail += ` (${areaParts.join(' / ')})`;
   }
 
   lines.push(`[시술] ${procedureDetail} 희망`);

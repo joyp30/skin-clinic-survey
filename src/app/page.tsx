@@ -9,11 +9,11 @@ import { ProcedureType } from '@/types/types';
 
 export default function Home() {
   const router = useRouter();
-  const [selectedProcedure, setSelectedProcedure] = useState<ProcedureType | null>(null);
+  const [selectedProcedures, setSelectedProcedures] = useState<string[]>([]);
 
   const handleStart = () => {
-    if (selectedProcedure) {
-      router.push(`/survey?procedure=${selectedProcedure}`);
+    if (selectedProcedures.length > 0) {
+      router.push(`/survey?procedure=${selectedProcedures.join(',')}`);
     }
   };
 
@@ -98,10 +98,14 @@ export default function Home() {
               }}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
-              className={`procedure-card ${selectedProcedure === proc.id ? 'selected' : ''}`}
-              onClick={() => setSelectedProcedure(proc.id)}
+              className={`procedure-card ${selectedProcedures.includes(proc.id) ? 'selected' : ''}`}
+              onClick={() => {
+                setSelectedProcedures(prev => 
+                  prev.includes(proc.id) ? prev.filter(p => p !== proc.id) : [...prev, proc.id]
+                );
+              }}
               style={
-                selectedProcedure === proc.id
+                selectedProcedures.includes(proc.id)
                   ? { borderColor: proc.color, boxShadow: `0 0 24px ${proc.color}30` }
                   : {}
               }
@@ -109,7 +113,7 @@ export default function Home() {
               <span className="procedure-icon">{proc.icon}</span>
               <span className="procedure-name">{proc.name}</span>
               <span className="procedure-desc">{proc.description}</span>
-              {selectedProcedure === proc.id && (
+              {selectedProcedures.includes(proc.id) && (
                 <span
                   className="procedure-check"
                   style={{ background: proc.color }}
@@ -130,9 +134,9 @@ export default function Home() {
         transition={{ delay: 0.8 }}
       >
         <button
-          className={`start-btn ${selectedProcedure ? 'active' : ''}`}
+          className={`start-btn ${selectedProcedures.length > 0 ? 'active' : ''}`}
           onClick={handleStart}
-          disabled={!selectedProcedure}
+          disabled={selectedProcedures.length === 0}
         >
           문진 시작하기
           <ArrowRight size={20} />

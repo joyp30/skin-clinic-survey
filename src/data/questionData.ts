@@ -392,36 +392,40 @@ export function getStepsForProcedure(procedure: string): SurveyStep[] {
     },
   ];
 
-  switch (procedure) {
-    case 'botox':
-      steps.push({
-        title: '보톡스 시술 관련',
-        subtitle: '보톡스 시술에 필요한 추가 정보입니다',
-        questions: botoxQuestions,
-      });
-      break;
-    case 'filler':
-      steps.push({
-        title: '필러 시술 관련',
-        subtitle: '필러 시술에 필요한 추가 정보입니다',
-        questions: fillerQuestions,
-      });
-      break;
-    case 'laser':
-      steps.push({
-        title: '레이저 시술 관련',
-        subtitle: '레이저 시술에 필요한 추가 정보입니다',
-        questions: laserQuestions,
-      });
-      break;
-    case 'lifting':
-      steps.push({
-        title: '리프팅 시술 관련',
-        subtitle: '리프팅 시술에 필요한 추가 정보입니다',
-        questions: liftingQuestions,
-      });
-      break;
-  }
+  const proceduresArray = procedure.split(',').map(p => p.trim());
+
+  proceduresArray.forEach(proc => {
+    switch (proc) {
+      case 'botox':
+        steps.push({
+          title: '보톡스 시술 관련',
+          subtitle: '보톡스 시술에 필요한 추가 정보입니다',
+          questions: botoxQuestions,
+        });
+        break;
+      case 'filler':
+        steps.push({
+          title: '필러 시술 관련',
+          subtitle: '필러 시술에 필요한 추가 정보입니다',
+          questions: fillerQuestions,
+        });
+        break;
+      case 'laser':
+        steps.push({
+          title: '레이저 시술 관련',
+          subtitle: '레이저 시술에 필요한 추가 정보입니다',
+          questions: laserQuestions,
+        });
+        break;
+      case 'lifting':
+        steps.push({
+          title: '리프팅 시술 관련',
+          subtitle: '리프팅 시술에 필요한 추가 정보입니다',
+          questions: liftingQuestions,
+        });
+        break;
+    }
+  });
 
   /*
   steps.push({

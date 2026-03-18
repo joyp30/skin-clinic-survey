@@ -39,7 +39,7 @@ export interface SurveyFormData {
   createdAt?: string;
 
   // Procedure
-  procedure: ProcedureType;
+  procedure: string;
   procedureDetail: string;
 
   // Common

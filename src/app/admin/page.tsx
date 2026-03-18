@@ -89,8 +89,9 @@ export default function AdminDashboard() {
     );
   };
 
-  const getProcedureName = (id: string) => {
-    return procedures.find(p => p.id === id)?.name || id;
+  const getProcedureName = (idStr: string) => {
+    if (!idStr) return '';
+    return idStr.split(',').map(id => procedures.find(p => p.id === id.trim())?.name || id).join(', ');
   };
 
   const filteredHistory = history.filter(item => 
