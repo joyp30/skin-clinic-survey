@@ -1,5 +1,4 @@
-'use client';
-
+import { useState, useEffect } from 'react';
 import { Question } from '@/types/types';
 
 interface QuestionCardProps {
@@ -15,6 +14,45 @@ export default function QuestionCard({
   onChange,
   animationDelay = 0,
 }: QuestionCardProps) {
+  // State for custom '기타' text input
+  const [customText, setCustomText] = useState('');
+
+  // Extract initial custom text if it exists in the value strings
+  useEffect(() => {
+    if (!value) return;
+    const values = value.split(', ');
+    const otherVal = values.find(v => v.startsWith('기타('));
+    if (otherVal) {
+      const match = otherVal.match(/기타\((.*)\)/);
+      if (match && match[1]) {
+        setCustomText(match[1]);
+      }
+    }
+  }, []);
+
+  const handleCustomTextChange = (newText: string, isCheckbox: boolean) => {
+    setCustomText(newText);
+    
+    if (isCheckbox) {
+      let currentValues = value ? value.split(', ') : [];
+      // Remove any existing "기타" entries
+      currentValues = currentValues.filter((v) => !v.startsWith('기타'));
+      
+      if (newText.trim() !== '') {
+        currentValues.push(`기타(${newText})`);
+      } else {
+        currentValues.push('기타'); // Just "기타" if empty
+      }
+      onChange(currentValues.join(', '));
+    } else {
+      // Radio
+      if (newText.trim() !== '') {
+        onChange(`기타(${newText})`);
+      } else {
+        onChange('기타');
+      }
+    }
+  };
   return (
     <div
       className="question-card"
@@ -50,48 +88,111 @@ export default function QuestionCard({
         )}
 
         {question.type === 'radio' && question.options && (
-          <div className="radio-group">
-            {question.options.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={`radio-btn ${value === option.value ? 'selected' : ''}`}
-                onClick={() => onChange(option.value)}
-              >
-                <span className="radio-indicator">
-                  {value === option.value ? '●' : '○'}
-                </span>
-                {option.label}
-              </button>
-            ))}
+          <div className="radio-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {question.options.map((option) => {
+              const isOther = option.value === '기타';
+              const isSelected = isOther ? value.startsWith('기타') : value === option.value;
+              
+              return (
+                <div key={option.value} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <button
+                    type="button"
+                    className={`radio-btn ${isSelected ? 'selected' : ''}`}
+                    onClick={() => {
+                      if (isOther) {
+                        onChange(customText ? `기타(${customText})` : '기타');
+                      } else {
+                        onChange(option.value);
+                      }
+                    }}
+                  >
+                    <span className="radio-indicator">
+                      {isSelected ? '●' : '○'}
+                    </span>
+                    {option.label}
+                  </button>
+                  
+                  {isOther && isSelected && (
+                    <input
+                      type="text"
+                      className="text-input"
+                      placeholder="기타 사항을 입력해 주세요"
+                      value={customText}
+                      onChange={(e) => handleCustomTextChange(e.target.value, false)}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ 
+                        marginLeft: '32px', 
+                        width: 'calc(100% - 32px)', 
+                        marginTop: '-4px',
+                        padding: '12px',
+                        fontSize: '0.95rem'
+                      }}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
 
         {question.type === 'checkbox' && question.options && (
-          <div className="checkbox-group radio-group">
+          <div className="checkbox-group radio-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {question.options.map((option) => {
               const selectedValues = value ? value.split(', ') : [];
-              const isSelected = selectedValues.includes(option.value);
+              const isOther = option.value === '기타';
+              
+              const isSelected = isOther 
+                ? selectedValues.some(v => v.startsWith('기타')) 
+                : selectedValues.includes(option.value);
+
               return (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={`radio-btn checkbox-btn ${isSelected ? 'selected' : ''}`}
-                  onClick={() => {
-                    let newValues = [...selectedValues];
-                    if (isSelected) {
-                      newValues = newValues.filter((v) => v !== option.value);
-                    } else {
-                      newValues.push(option.value);
-                    }
-                    onChange(newValues.join(', '));
-                  }}
-                >
-                  <span className="radio-indicator checkbox-indicator">
-                    {isSelected ? '☑' : '☐'}
-                  </span>
-                  {option.label}
-                </button>
+                <div key={option.value} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <button
+                    type="button"
+                    className={`radio-btn checkbox-btn ${isSelected ? 'selected' : ''}`}
+                    onClick={() => {
+                      let newValues = [...selectedValues];
+                      
+                      if (isOther) {
+                        if (isSelected) {
+                          newValues = newValues.filter((v) => !v.startsWith('기타'));
+                        } else {
+                          newValues.push(customText ? `기타(${customText})` : '기타');
+                        }
+                      } else {
+                        if (isSelected) {
+                          newValues = newValues.filter((v) => v !== option.value);
+                        } else {
+                          newValues.push(option.value);
+                        }
+                      }
+                      onChange(newValues.join(', '));
+                    }}
+                  >
+                    <span className="radio-indicator checkbox-indicator">
+                      {isSelected ? '☑' : '☐'}
+                    </span>
+                    {option.label}
+                  </button>
+
+                  {isOther && isSelected && (
+                    <input
+                      type="text"
+                      className="text-input"
+                      placeholder="기타 부위를 입력해 주세요"
+                      value={customText}
+                      onChange={(e) => handleCustomTextChange(e.target.value, true)}
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ 
+                        marginLeft: '32px', 
+                        width: 'calc(100% - 32px)', 
+                        marginTop: '-4px',
+                        padding: '12px',
+                        fontSize: '0.95rem'
+                      }}
+                    />
+                  )}
+                </div>
               );
             })}
           </div>
