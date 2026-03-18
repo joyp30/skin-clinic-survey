@@ -88,7 +88,8 @@ export function generateCrmText(data: SurveyFormData): string {
     history.push(`최근 6개월 내 보톡스 시술${clinic}`);
   }
   if (data.botoxResistance === 'yes') {
-    history.push('보톡스 내성 의심');
+    const product = data.botoxResistanceProduct ? ` (${data.botoxResistanceProduct})` : '';
+    history.push(`보톡스 내성 의심${product}`);
   }
   if (data.fillerPrevious === 'yes') {
     history.push('기존 필러 시술 이력');

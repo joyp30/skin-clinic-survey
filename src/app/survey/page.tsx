@@ -33,6 +33,7 @@ function SurveyContent() {
       allergyDetail: '',
       botoxRecent: '',
       botoxResistance: '',
+      botoxResistanceProduct: '',
       botoxArea: '',
       botoxPreviousClinic: '',
       fillerPrevious: '',
@@ -179,6 +180,7 @@ function SurveyContent() {
               if (question.id === 'allergyDetail' && formValues.allergyOther !== 'yes') return null;
               if (question.id === 'metalImplantDetail' && formValues.metalImplant !== 'yes') return null;
               if (question.id === 'botoxPreviousClinic' && formValues.botoxRecent !== 'yes') return null;
+              if (question.id === 'botoxResistanceProduct' && formValues.botoxResistance !== 'yes') return null;
 
               return (
                 <motion.div

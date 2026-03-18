@@ -131,7 +131,8 @@ export const botoxQuestions: Question[] = [
     id: 'botoxArea',
     category: '보톡스',
     text: '시술 희망 부위를 선택해 주세요.',
-    type: 'radio',
+    subtext: '(중복 선택 가능)',
+    type: 'checkbox',
     options: [
       { label: '이마/미간', value: '이마/미간' },
       { label: '눈가(까마귀발)', value: '눈가' },
@@ -141,6 +142,13 @@ export const botoxQuestions: Question[] = [
       { label: '기타', value: '기타' },
     ],
     required: true,
+  },
+  {
+    id: 'botoxResistanceProduct',
+    category: '보톡스',
+    text: '내성이 생긴(또는 의심되는) 보톡스 제품명을 알고 계시다면 적어주세요.',
+    type: 'text',
+    required: false,
   },
   {
     id: 'botoxPreviousClinic',
@@ -330,7 +338,8 @@ export const skinStatusQuestions: Question[] = [
     id: 'skinConcerns',
     category: '피부상태',
     text: '현재 가장 고민되는 피부 문제를 선택해 주세요.',
-    type: 'radio',
+    subtext: '(중복 선택 가능)',
+    type: 'checkbox',
     options: [
       { label: '주름/탄력 저하', value: '주름/탄력' },
       { label: '색소침착/기미', value: '색소/기미' },

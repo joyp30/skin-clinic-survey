@@ -54,6 +54,7 @@ export interface SurveyFormData {
   // Botox specific
   botoxRecent: string;
   botoxResistance: string;
+  botoxResistanceProduct: string;
   botoxArea: string;
   botoxPreviousClinic: string;
 
