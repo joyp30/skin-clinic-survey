@@ -1,65 +1,143 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { Stethoscope, Shield, Clock, ArrowRight } from 'lucide-react';
+import { procedures } from '@/data/questionData';
+import { ProcedureType } from '@/types/types';
 
 export default function Home() {
+  const router = useRouter();
+  const [selectedProcedure, setSelectedProcedure] = useState<ProcedureType | null>(null);
+
+  const handleStart = () => {
+    if (selectedProcedure) {
+      router.push(`/survey?procedure=${selectedProcedure}`);
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <motion.main 
+      className="landing-page"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Hero Section */}
+      <div className="hero-section">
+        <div className="hero-glow" />
+        <motion.div 
+          className="hero-content"
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className="hero-badge">
+            <Stethoscope size={16} />
+            사전 문진 시스템
+          </div>
+          <h1 className="hero-title">
+            피부과
+            <span className="hero-title-accent"> 사전문진</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="hero-subtitle">
+            안전하고 효과적인 시술을 위해
+            <br />
+            사전 문진에 답변해 주세요
           </p>
+        </motion.div>
+      </div>
+
+      {/* Trust Badges */}
+      <motion.div 
+        className="trust-badges"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+      >
+        <div className="trust-badge">
+          <Shield size={18} />
+          <span>개인정보 보호</span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="trust-badge">
+          <Clock size={18} />
+          <span>약 3분 소요</span>
         </div>
-      </main>
-    </div>
+      </motion.div>
+
+      {/* Procedure Selection */}
+      <section className="procedure-section">
+        <motion.h2 
+          className="section-title"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          시술을 선택해 주세요
+        </motion.h2>
+        <motion.div 
+          className="procedure-grid"
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: { staggerChildren: 0.1, delayChildren: 0.4 }
+            }
+          }}
+          initial="hidden"
+          animate="show"
+        >
+          {procedures.map((proc) => (
+            <motion.button
+              key={proc.id}
+              variants={{
+                hidden: { y: 20, opacity: 0 },
+                show: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 300, damping: 24 } }
+              }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+              className={`procedure-card ${selectedProcedure === proc.id ? 'selected' : ''}`}
+              onClick={() => setSelectedProcedure(proc.id)}
+              style={
+                selectedProcedure === proc.id
+                  ? { borderColor: proc.color, boxShadow: `0 0 24px ${proc.color}30` }
+                  : {}
+              }
+            >
+              <span className="procedure-icon">{proc.icon}</span>
+              <span className="procedure-name">{proc.name}</span>
+              <span className="procedure-desc">{proc.description}</span>
+              {selectedProcedure === proc.id && (
+                <span
+                  className="procedure-check"
+                  style={{ background: proc.color }}
+                >
+                  ✓
+                </span>
+              )}
+            </motion.button>
+          ))}
+        </motion.div>
+      </section>
+
+      {/* Start Button */}
+      <motion.div 
+        className="start-section"
+        initial={{ y: 30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.8 }}
+      >
+        <button
+          className={`start-btn ${selectedProcedure ? 'active' : ''}`}
+          onClick={handleStart}
+          disabled={!selectedProcedure}
+        >
+          문진 시작하기
+          <ArrowRight size={20} />
+        </button>
+      </motion.div>
+    </motion.main>
   );
 }
