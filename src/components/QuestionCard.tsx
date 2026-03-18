@@ -67,6 +67,36 @@ export default function QuestionCard({
           </div>
         )}
 
+        {question.type === 'checkbox' && question.options && (
+          <div className="checkbox-group radio-group">
+            {question.options.map((option) => {
+              const selectedValues = value ? value.split(', ') : [];
+              const isSelected = selectedValues.includes(option.value);
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`radio-btn checkbox-btn ${isSelected ? 'selected' : ''}`}
+                  onClick={() => {
+                    let newValues = [...selectedValues];
+                    if (isSelected) {
+                      newValues = newValues.filter((v) => v !== option.value);
+                    } else {
+                      newValues.push(option.value);
+                    }
+                    onChange(newValues.join(', '));
+                  }}
+                >
+                  <span className="radio-indicator checkbox-indicator">
+                    {isSelected ? '☑' : '☐'}
+                  </span>
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {question.type === 'text' && (
           <textarea
             className="text-input"

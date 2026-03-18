@@ -185,7 +185,8 @@ export const fillerQuestions: Question[] = [
     id: 'fillerArea',
     category: '필러',
     text: '시술 희망 부위를 선택해 주세요.',
-    type: 'radio',
+    subtext: '(중복 선택 가능)',
+    type: 'checkbox',
     options: [
       { label: '이마/관자놀이', value: '이마/관자놀이' },
       { label: '코', value: '코' },
@@ -214,6 +215,7 @@ export const laserLiftingQuestions: Question[] = [
     id: 'metalImplantDetail',
     category: '레이저/리프팅',
     text: '임플란트 위치를 입력해 주세요.',
+    subtext: '예: 오른쪽 어깨 인공관절, 치아 임플란트 2개 등',
     type: 'text',
     required: false,
   },
@@ -300,7 +302,8 @@ export const skinStatusQuestions: Question[] = [
     id: 'skinType',
     category: '피부상태',
     text: '본인의 피부 타입을 선택해 주세요.',
-    type: 'radio',
+    subtext: '(중복 선택 가능)',
+    type: 'checkbox',
     options: [
       { label: '얇고 예민한 피부', value: '얇고 예민한 피부' },
       { label: '보통 피부', value: '보통 피부' },
