@@ -3,7 +3,8 @@ import {
   commonQuestions,
   botoxQuestions,
   fillerQuestions,
-  laserLiftingQuestions,
+  laserQuestions,
+  liftingQuestions,
 } from '@/data/questionData';
 
 const procedureNames: Record<ProcedureType, string> = {
@@ -32,7 +33,9 @@ export function generateCrmText(data: SurveyFormData): string {
       ? botoxQuestions
       : data.procedure === 'filler'
         ? fillerQuestions
-        : laserLiftingQuestions;
+        : data.procedure === 'laser'
+          ? laserQuestions
+          : liftingQuestions;
 
   procQuestions.forEach((q) => {
     if (q.warningOn && data[q.id] === q.warningOn && q.warningMessage) {
@@ -62,7 +65,9 @@ export function generateCrmText(data: SurveyFormData): string {
       ? data.botoxArea
       : data.procedure === 'filler'
         ? data.fillerArea
-        : '';
+        : data.procedure === 'lifting'
+          ? data.liftingArea
+          : '';
   if (areaField) {
     procedureDetail += ` (${areaField})`;
   }

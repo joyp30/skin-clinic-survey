@@ -87,3 +87,15 @@
 ✓ Compiled in 75ms
 ✓ Compiled in 27ms
 ✓ Compiled in 14ms
+✓ Compiled in 31ms
+✓ Compiled in 14ms
+✓ Compiled in 23ms
+✓ Compiled in 12ms
+ GET /admin 200 in 258ms (compile: 144ms, render: 113ms)
+ GET /result 200 in 260ms (compile: 91ms, render: 170ms)
+ GET /survey?procedure=laser 200 in 100ms (compile: 35ms, render: 65ms)
+ GET /result 200 in 99ms (compile: 63ms, render: 36ms)
+ GET /admin 200 in 47ms (compile: 1996µs, render: 45ms)
+ GET /admin 200 in 48ms (compile: 9ms, render: 39ms)
+ GET /survey?procedure=laser 200 in 50ms (compile: 2ms, render: 47ms)
+ GET /admin 200 in 33ms (compile: 4ms, render: 28ms)

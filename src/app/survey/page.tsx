@@ -40,6 +40,7 @@ function SurveyContent() {
       fillerNodule: '',
       fillerInflammation: '',
       fillerArea: '',
+      liftingArea: '',
       metalImplant: '',
       metalImplantDetail: '',
       keloid: '',

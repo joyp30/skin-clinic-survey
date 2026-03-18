@@ -208,7 +208,7 @@ export const fillerQuestions: Question[] = [
   },
 ];
 
-export const laserLiftingQuestions: Question[] = [
+export const commonLaserLiftingQuestions: Question[] = [
   {
     id: 'metalImplant',
     category: '레이저/리프팅',
@@ -247,6 +247,31 @@ export const laserLiftingQuestions: Question[] = [
     warningMessage: '최근 자외선 과다 노출',
     required: true,
   },
+];
+
+export const laserQuestions: Question[] = [
+  ...commonLaserLiftingQuestions
+];
+
+export const liftingQuestions: Question[] = [
+  {
+    id: 'liftingArea',
+    category: '리프팅',
+    text: '집중적으로 리프팅을 원하는 부위를 선택해 주세요.',
+    subtext: '(중복 선택 가능)',
+    type: 'checkbox',
+    options: [
+      { label: '얼굴 전체', value: '얼굴 전체' },
+      { label: '심부볼(불독살)', value: '심부볼' },
+      { label: '이중턱/턱라인', value: '이중턱/턱라인' },
+      { label: '팔자주름', value: '팔자주름' },
+      { label: '눈가/이마', value: '눈가/이마' },
+      { label: '목주름', value: '목주름' },
+      { label: '기타', value: '기타' },
+    ],
+    required: true,
+  },
+  ...commonLaserLiftingQuestions
 ];
 
 export const bddqQuestions: Question[] = [
@@ -383,11 +408,17 @@ export function getStepsForProcedure(procedure: string): SurveyStep[] {
       });
       break;
     case 'laser':
+      steps.push({
+        title: '레이저 시술 관련',
+        subtitle: '레이저 시술에 필요한 추가 정보입니다',
+        questions: laserQuestions,
+      });
+      break;
     case 'lifting':
       steps.push({
-        title: '레이저/리프팅 시술 관련',
-        subtitle: '레이저/리프팅 시술에 필요한 추가 정보입니다',
-        questions: laserLiftingQuestions,
+        title: '리프팅 시술 관련',
+        subtitle: '리프팅 시술에 필요한 추가 정보입니다',
+        questions: liftingQuestions,
       });
       break;
   }

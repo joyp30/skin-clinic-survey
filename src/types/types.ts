@@ -65,6 +65,7 @@ export interface SurveyFormData {
   fillerArea: string;
 
   // Laser/Lifting specific
+  liftingArea: string;
   metalImplant: string;
   metalImplantDetail: string;
   keloid: string;
