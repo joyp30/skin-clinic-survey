@@ -13,7 +13,7 @@ const procedureNames: Record<string, string> = {
   botox: '보톡스',
   filler: '필러',
   pigment: '색소',
-  lifting: '리프팅',
+  lifting: '리프팅 및 콜라겐부스터',
   acne: '여드름',
 };
 
@@ -69,7 +69,7 @@ export function generateCrmText(data: SurveyFormData): string {
   const areaParts: string[] = [];
   if (data.botoxArea) areaParts.push(`보톡스: ${data.botoxArea}`);
   if (data.fillerArea) areaParts.push(`필러: ${data.fillerArea}`);
-  if (data.liftingArea) areaParts.push(`리프팅: ${data.liftingArea}`);
+  if (data.liftingArea) areaParts.push(`리프팅 및 콜라겐부스터: ${data.liftingArea}`);
   
   if (areaParts.length > 0) {
     procedureDetail += ` (${areaParts.join(' / ')})`;

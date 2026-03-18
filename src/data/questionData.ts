@@ -27,7 +27,7 @@ export const procedures: ProcedureInfo[] = [
   },
   {
     id: 'lifting',
-    name: '리프팅',
+    name: '리프팅 및 콜라겐부스터',
     nameEn: 'Lifting',
     icon: '🌟',
     description: '피부 탄력 및 처짐 개선',
@@ -552,8 +552,8 @@ export function getStepsForProcedure(procedure: string): SurveyStep[] {
         break;
       case 'lifting':
         steps.push({
-          title: '리프팅 시술 관련',
-          subtitle: '리프팅 시술에 필요한 추가 정보입니다',
+          title: '리프팅 및 콜라겐부스터 관련',
+          subtitle: '리프팅 및 부스터 시술에 필요한 추가 정보입니다',
           questions: liftingQuestions,
         });
         break;

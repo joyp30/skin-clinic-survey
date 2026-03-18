@@ -18,7 +18,7 @@ const procedureLabels: Record<ProcedureType, string> = {
   botox: '보톡스',
   filler: '필러',
   pigment: '색소',
-  lifting: '리프팅',
+  lifting: '리프팅 및 콜라겐부스터',
   acne: '여드름',
 };
 
