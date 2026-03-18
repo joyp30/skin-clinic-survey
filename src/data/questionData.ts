@@ -18,11 +18,11 @@ export const procedures: ProcedureInfo[] = [
     color: '#ec4899',
   },
   {
-    id: 'laser',
-    name: '레이저',
-    nameEn: 'Laser',
-    icon: '🔬',
-    description: '피부 재생 및 색소 치료',
+    id: 'pigment',
+    name: '색소',
+    nameEn: 'Pigmentation',
+    icon: '✨',
+    description: '기미/잡티 정밀 진단 및 치료',
     color: '#f59e0b',
   },
   {
@@ -257,11 +257,82 @@ export const commonLaserLiftingQuestions: Question[] = [
   },
 ];
 
-export const laserQuestions: Question[] = [
+export const photoGuideQuestions: Question[] = [
+  {
+    id: 'photoGuide1',
+    category: '촬영 안내',
+    text: '현재 필터가 적용되지 않은 생얼(세안 직후) 상태이신가요?',
+    type: 'yesno',
+    required: true,
+  },
+  {
+    id: 'photoGuide2',
+    category: '촬영 안내',
+    text: '주변에 자연광이나 밝은 조명이 있나요?',
+    type: 'yesno',
+    required: true,
+  }
+];
+
+export const pigmentQuestions: Question[] = [
+  {
+    id: 'pigmentStart',
+    category: '색소',
+    text: '가장 고민되는 색소(기미/잡티)가 언제부터 눈에 띄기 시작했나요?',
+    type: 'radio',
+    options: [
+      { label: '최근 1달 이내', value: '1달 이내' },
+      { label: '최근 6개월 이내', value: '6개월 이내' },
+      { label: '1년 이상(만성)', value: '1년 이상' },
+      { label: '어릴 때부터', value: '어릴 때부터' },
+    ],
+    required: true,
+  },
+  {
+    id: 'pigmentUv',
+    category: '색소',
+    text: '평소 외부 활동 시간과 선크림 사용 습관은 어떠신가요?',
+    type: 'radio',
+    options: [
+      { label: '야외 활동 많음 / 선크림 잘 안 바름 (-)', value: '야외 활동 많음 / 선크림 미사용' },
+      { label: '야외 활동 많음 / 선크림 매일 바름', value: '야외 활동 많음 / 선크림 사용' },
+      { label: '실내 위주 생활 / 선크림 잘 안 바름', value: '실내 위주 생활 / 선크림 미사용' },
+      { label: '실내 위주 생활 / 선크림 매일 바름 (+)', value: '실내 위주 생활 / 선크림 사용' },
+    ],
+    required: true,
+  },
+  {
+    id: 'pigmentType',
+    category: '색소',
+    text: '현재 색소 병변의 특징을 가장 잘 설명하는 것을 모두 선택해 주세요.',
+    subtext: '기미와 주근깨/잡티를 구분하는 참고 자료로 사용됩니다.',
+    type: 'checkbox',
+    options: [
+      { label: '광대뼈 주위로 넓고 옅게 퍼져 있음 (기미 의심)', value: '대칭형 넓은 기미' },
+      { label: '갈색 점처럼 작고 뚜렷하게 군데군데 있음', value: '뚜렷한 잡티/주근깨' },
+      { label: '여드름이나 상처가 아문 후 남은 색소침착', value: '염증 후 색소침착(PIH)' },
+      { label: '잘 모르겠음 (원장님 진단 필요)', value: '진단 필요' },
+    ],
+    required: true,
+  },
   ...commonLaserLiftingQuestions
 ];
 
 export const liftingQuestions: Question[] = [
+  {
+    id: 'liftingSleepHabit',
+    category: '리프팅',
+    text: '평소 가장 자주 취하는 수면 자세를 선택해 주세요.',
+    subtext: '수면 중 눌리는 방향은 안면 비대칭 및 처짐(Anti-Gravity 지수)에 영향을 줍니다.',
+    type: 'radio',
+    options: [
+      { label: '천장을 보고 똑바로 누움', value: '똑바로 누움' },
+      { label: '주로 오른쪽으로 돌아누움', value: '우측 누움' },
+      { label: '주로 왼쪽으로 돌아누움', value: '좌측 누움' },
+      { label: '엎드려 잠', value: '엎드려 잠' },
+    ],
+    required: true,
+  },
   {
     id: 'liftingArea',
     category: '리프팅',
@@ -472,11 +543,11 @@ export function getStepsForProcedure(procedure: string): SurveyStep[] {
           questions: fillerQuestions,
         });
         break;
-      case 'laser':
+      case 'pigment':
         steps.push({
-          title: '레이저 시술 관련',
-          subtitle: '레이저 시술에 필요한 추가 정보입니다',
-          questions: laserQuestions,
+          title: '색소 시술 관련',
+          subtitle: '색소(기미/잡티) 진단에 꼭 필요한 정보입니다',
+          questions: pigmentQuestions,
         });
         break;
       case 'lifting':
@@ -496,18 +567,10 @@ export function getStepsForProcedure(procedure: string): SurveyStep[] {
     }
   });
 
-  /*
   steps.push({
-    title: '외모 고민 설문',
-    subtitle: '시술 만족도를 높이기 위해 고객님의 평소 생각을 여쭤봅니다',
-    questions: bddqQuestions,
-  });
-  */
-
-  steps.push({
-    title: '피부 상태 확인',
-    subtitle: '맞춤 상담을 위한 피부 정보입니다',
-    questions: skinStatusQuestions,
+    title: '피부 상태 확인 및 사진 가이드',
+    subtitle: '정확한 진단을 위한 피부 정보와 촬영 전 체크리스트입니다',
+    questions: [...skinStatusQuestions, ...photoGuideQuestions],
   });
 
   return steps;

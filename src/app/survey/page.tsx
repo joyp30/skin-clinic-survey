@@ -40,10 +40,14 @@ function SurveyContent() {
       fillerNodule: '',
       fillerInflammation: '',
       fillerArea: '',
+      liftingSleepHabit: '',
       acneIsotretinoin: '',
       acneType: '',
       acneLifestyle: '',
       acneHormone: '',
+      pigmentStart: '',
+      pigmentUv: '',
+      pigmentType: '',
       liftingArea: '',
       metalImplant: '',
       metalImplantDetail: '',
@@ -57,6 +61,8 @@ function SurveyContent() {
       painSensitivity: '',
       skinConcerns: '',
       additionalNotes: '',
+      photoGuide1: '',
+      photoGuide2: '',
     },
   });
 

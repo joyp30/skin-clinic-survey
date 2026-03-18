@@ -17,7 +17,7 @@ import { procedures } from '@/data/questionData';
 const procedureLabels: Record<ProcedureType, string> = {
   botox: '보톡스',
   filler: '필러',
-  laser: '레이저',
+  pigment: '색소',
   lifting: '리프팅',
   acne: '여드름',
 };

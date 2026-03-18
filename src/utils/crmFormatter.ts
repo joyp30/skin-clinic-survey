@@ -3,15 +3,16 @@ import {
   commonQuestions,
   botoxQuestions,
   fillerQuestions,
-  laserQuestions,
+  pigmentQuestions,
   liftingQuestions,
   acneQuestions,
+  photoGuideQuestions,
 } from '@/data/questionData';
 
 const procedureNames: Record<string, string> = {
   botox: '보톡스',
   filler: '필러',
-  laser: '레이저',
+  pigment: '색소',
   lifting: '리프팅',
   acne: '여드름',
 };
@@ -35,7 +36,7 @@ export function generateCrmText(data: SurveyFormData): string {
   procedureArray.forEach(p => {
     if (p === 'botox') procQuestions.push(...botoxQuestions);
     else if (p === 'filler') procQuestions.push(...fillerQuestions);
-    else if (p === 'laser') procQuestions.push(...laserQuestions);
+    else if (p === 'pigment') procQuestions.push(...pigmentQuestions);
     else if (p === 'lifting') procQuestions.push(...liftingQuestions);
     else if (p === 'acne') procQuestions.push(...acneQuestions);
   });
@@ -157,16 +158,40 @@ export function generateCrmText(data: SurveyFormData): string {
     }
   }
 
-  // --- [피부상태] Skin status ---
+  // --- [색소 분석] Pigment specific ---
+  if (data.procedure.includes('pigment')) {
+    const pigmentParts: string[] = [];
+    if (data.pigmentType) pigmentParts.push(`타입: ${data.pigmentType.replace(/기타(, )?/g, '')}`);
+    if (data.pigmentStart) pigmentParts.push(`발생 시기: ${data.pigmentStart}`);
+    if (data.pigmentUv) pigmentParts.push(`습관: ${data.pigmentUv}`);
+
+    if (pigmentParts.length > 0) {
+      lines.push('\n[색소 분석]');
+      pigmentParts.forEach(p => lines.push(`- ${p}`));
+      lines.push(''); // spacing
+    }
+  }
+
+  // --- [피부상태 및 사진가이드] Skin status & conditions ---
   const skinParts: string[] = [];
   if (data.skinType) skinParts.push(data.skinType);
   if (data.painSensitivity && data.painSensitivity !== '보통') {
-    skinParts.push(`통증 민감도 ${data.painSensitivity}`);
+    skinParts.push(`통증/민감도: ${data.painSensitivity}`);
   }
-  if (data.skinConcerns) skinParts.push(`주요고민: ${data.skinConcerns}`);
+  if (data.skinConcerns) skinParts.push(`고민: ${data.skinConcerns}`);
+  if (data.liftingSleepHabit) skinParts.push(`수면 자세: ${data.liftingSleepHabit}`);
 
   if (skinParts.length > 0) {
     lines.push(`[피부상태] ${skinParts.join(', ')}`);
+  }
+  
+  // Photo guide check
+  const guideFlags: string[] = [];
+  if (data.photoGuide1 === 'no') guideFlags.push('조명 부적합');
+  if (data.photoGuide2 === 'no') guideFlags.push('필터 사용 또는 화장 상태');
+  
+  if (guideFlags.length > 0) {
+    lines.push(`⚠️ 사진 재촬영 필요 가능성 높음: ${guideFlags.join(', ')}`);
   }
 
   // --- [BDDQ] Score ---
