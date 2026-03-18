@@ -1071,3 +1071,25 @@ body {
     display: none;
   }
 }
+
+/* Custom Logo */
+.hero-logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.hero-logo {
+  max-width: 250px;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.hero-logo:hover {
+  transform: translateY(-2px);
+}

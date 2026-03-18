@@ -34,13 +34,17 @@ export default function Home() {
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         >
+          <div className="hero-logo-container">
+            <img src="/seoul_logo.png" alt="서울피부과의원 로고" className="hero-logo" />
+          </div>
           <div className="hero-badge">
             <Stethoscope size={16} />
-            사전 문진 시스템
+            스마트 문진 시스템
           </div>
           <h1 className="hero-title">
-            피부과
-            <span className="hero-title-accent"> 사전문진</span>
+            서울피부과의원
+            <br />
+            <span className="hero-title-accent">피부과 사전문진</span>
           </h1>
           <p className="hero-subtitle">
             안전하고 효과적인 시술을 위해
