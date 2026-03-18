@@ -1,4 +1,4 @@
-export type ProcedureType = 'botox' | 'filler' | 'laser' | 'lifting';
+export type ProcedureType = 'botox' | 'filler' | 'laser' | 'lifting' | 'acne';
 
 export interface ProcedureInfo {
   id: ProcedureType;
@@ -63,6 +63,12 @@ export interface SurveyFormData {
   fillerNodule: string;
   fillerInflammation: string;
   fillerArea: string;
+
+  // Acne specific
+  acneIsotretinoin: string;
+  acneType: string;
+  acneLifestyle: string;
+  acneHormone: string;
 
   // Laser/Lifting specific
   liftingArea: string;

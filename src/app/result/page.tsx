@@ -19,6 +19,7 @@ const procedureLabels: Record<ProcedureType, string> = {
   filler: '필러',
   laser: '레이저',
   lifting: '리프팅',
+  acne: '여드름',
 };
 
 export default function ResultPage() {

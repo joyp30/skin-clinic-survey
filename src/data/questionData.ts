@@ -33,6 +33,14 @@ export const procedures: ProcedureInfo[] = [
     description: '피부 탄력 및 처짐 개선',
     color: '#10b981',
   },
+  {
+    id: 'acne',
+    name: '여드름',
+    nameEn: 'Acne',
+    icon: '🌿',
+    description: '여드름 진단 및 맞춤 치료',
+    color: '#8b5cf6',
+  },
 ];
 
 export const commonQuestions: Question[] = [
@@ -274,6 +282,60 @@ export const liftingQuestions: Question[] = [
   ...commonLaserLiftingQuestions
 ];
 
+export const acneQuestions: Question[] = [
+  {
+    id: 'acneIsotretinoin',
+    category: '여드름',
+    text: '최근 6개월 이내 이소트레티노인(아큐테인, 로아큐탄 등)을 복용한 적이 있나요?',
+    subtext: '피부 재생 속도와 레이저 치료 방식 결정에 필수적인 정보입니다.',
+    type: 'yesno',
+    warningOn: 'yes',
+    warningMessage: '건조함 주의 (최근 6개월 내 이소트레티노인 복용 이력)',
+    required: true,
+  },
+  {
+    id: 'acneType',
+    category: '여드름',
+    text: '현재 가장 고민되는 여드름/자국 형태를 모두 선택해 주세요.',
+    subtext: '(중복 선택 가능) 본인의 피부 상태에 가장 가까운 것을 모두 골라주세요.',
+    type: 'checkbox',
+    options: [
+      { label: '붉은 자국 (PIE: 염증 후 홍반)', value: '붉은 자국(PIE)' },
+      { label: '검고 칙칙한 자국 (PIH: 염증 후 색소침착)', value: '검고 칙칙한 자국(PIH)' },
+      { label: '패인 흉터 (송곳형, 박스형, 롤링형 등)', value: '패인 흉터' },
+      { label: '화농성 여드름 (노란/하얀 고름)', value: '화농성 여드름' },
+      { label: '좁쌀 여드름 (화이트헤드/블랙헤드)', value: '좁쌀 여드름' },
+      { label: '기타', value: '기타' },
+    ],
+    required: true,
+  },
+  {
+    id: 'acneLifestyle',
+    category: '여드름',
+    text: '현재 해당되는 생활 습관 요인이 있다면 모두 선택해 주세요.',
+    subtext: '(중복 선택 가능) 여드름 발생 및 악화의 주요 원인이 될 수 있습니다.',
+    type: 'checkbox',
+    options: [
+      { label: '유제품 또는 고당분 식품 자주 섭취', value: '유제품/고당분 섭취' },
+      { label: '단백질 보충제(유청 등) 복용', value: '단백질 보충제 복용' },
+      { label: '과도한 스트레스', value: '과도한 스트레스' },
+      { label: '수면 부족 또는 불규칙한 수면', value: '수면 부족/불규칙' },
+      { label: '해당 사항 없음', value: '해당 없음' },
+    ],
+    required: true,
+  },
+  {
+    id: 'acneHormone',
+    category: '여드름',
+    text: '[여성 전용] 생리 주기에 따라 여드름이 심하게 악화되거나, 다낭성 난소 증후군(PCOS) 등 호르몬 질환을 진단받은 적이 있나요?',
+    subtext: '남성 고객님은 "아니오"를 선택해 주세요.',
+    type: 'yesno',
+    warningOn: 'yes',
+    warningMessage: '호르몬 요인 의심 (생리 주기 악화 및 PCOS)',
+    required: true,
+  },
+];
+
 export const bddqQuestions: Question[] = [
   {
     id: 'bddq1',
@@ -422,6 +484,13 @@ export function getStepsForProcedure(procedure: string): SurveyStep[] {
           title: '리프팅 시술 관련',
           subtitle: '리프팅 시술에 필요한 추가 정보입니다',
           questions: liftingQuestions,
+        });
+        break;
+      case 'acne':
+        steps.push({
+          title: '여드름 집중 문진',
+          subtitle: '여드름의 원인 분석 및 맞춤 치료를 위한 추가 정보입니다',
+          questions: acneQuestions,
         });
         break;
     }

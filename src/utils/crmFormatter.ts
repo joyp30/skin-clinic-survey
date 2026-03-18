@@ -5,6 +5,7 @@ import {
   fillerQuestions,
   laserQuestions,
   liftingQuestions,
+  acneQuestions,
 } from '@/data/questionData';
 
 const procedureNames: Record<string, string> = {
@@ -12,6 +13,7 @@ const procedureNames: Record<string, string> = {
   filler: '필러',
   laser: '레이저',
   lifting: '리프팅',
+  acne: '여드름',
 };
 
 export function generateCrmText(data: SurveyFormData): string {
@@ -35,6 +37,7 @@ export function generateCrmText(data: SurveyFormData): string {
     else if (p === 'filler') procQuestions.push(...fillerQuestions);
     else if (p === 'laser') procQuestions.push(...laserQuestions);
     else if (p === 'lifting') procQuestions.push(...liftingQuestions);
+    else if (p === 'acne') procQuestions.push(...acneQuestions);
   });
 
   procQuestions.forEach((q) => {
@@ -119,6 +122,39 @@ export function generateCrmText(data: SurveyFormData): string {
 
   if (history.length > 0) {
     lines.push(`[기왕력] ${history.join(', ')}`);
+  }
+
+  // --- [여드름 분석] Acne specific ---
+  if (data.procedure.includes('acne')) {
+    const acneLines: string[] = [];
+    
+    if (data.acneType) {
+      let typeStr = data.acneType.replace(/기타(, )?/g, '').trim();
+      if (typeStr.endsWith(',')) typeStr = typeStr.slice(0, -1);
+      if (typeStr) acneLines.push(`- 타입: ${typeStr.split(', ').join(' / ')}`);
+    }
+
+    if (data.acneIsotretinoin === 'yes') {
+      acneLines.push('- 약물: 이소트레티노인 복용 중 (주의 필요)');
+    }
+    
+    if (data.acneLifestyle && data.acneLifestyle !== '해당 없음') {
+      const lifestyleFactors = data.acneLifestyle.replace(/기타(, )?/g, '').replace('해당 없음', '').trim();
+      const hormoneFactor = data.acneHormone === 'yes' ? ', 생리 주기 악화/호르몬 요인' : '';
+      if (lifestyleFactors || hormoneFactor) {
+        // clean up leading comma formatting if lifestyle was empty but hormone was true
+        const factorStr = lifestyleFactors ? `${lifestyleFactors}${hormoneFactor}` : hormoneFactor.replace(/^, /, '');
+        acneLines.push(`- 요인: ${factorStr}`);
+      }
+    } else if (data.acneHormone === 'yes') {
+      acneLines.push(`- 요인: 생리 주기 악화/호르몬 요인`);
+    }
+
+    if (acneLines.length > 0) {
+      lines.push('\n[여드름 분석]');
+      lines.push(...acneLines);
+      lines.push(''); // add empty line to separate visually
+    }
   }
 
   // --- [피부상태] Skin status ---
