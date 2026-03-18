@@ -92,10 +92,19 @@ function SurveyContent() {
       // Save for current session (Result page)
       sessionStorage.setItem('surveyData', JSON.stringify(data));
       
-      // Save to admin dashboard history
-      const existingHistory = JSON.parse(localStorage.getItem('surveyHistory') || '[]');
-      existingHistory.push(data);
-      localStorage.setItem('surveyHistory', JSON.stringify(existingHistory));
+      // Save local backup just in case
+      try {
+        const existingHistory = JSON.parse(localStorage.getItem('surveyHistory') || '[]');
+        existingHistory.push(data);
+        localStorage.setItem('surveyHistory', JSON.stringify(existingHistory));
+      } catch (e) { }
+
+      // Save to Vercel KV DB
+      fetch('/api/surveys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      }).catch(err => console.error('DB Save error', err));
 
       router.push('/result');
     }

@@ -21,25 +21,55 @@ export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // In a real app, this would be an API call with authentication
-    const storedHistory = localStorage.getItem('surveyHistory');
-    if (storedHistory) {
+    const fetchSurveys = async () => {
       try {
-        const parsed = JSON.parse(storedHistory) as SurveyFormData[];
-        // Sort by newest first
-        const sorted = parsed.sort((a, b) => {
-          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-          return dateB - dateA;
-        });
-        setHistory(sorted);
+        const res = await fetch('/api/surveys', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          
+          if (Array.isArray(data)) {
+            const sorted = data.sort((a: SurveyFormData, b: SurveyFormData) => {
+              const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+              const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+              return dateB - dateA;
+            });
+            setHistory(sorted);
+          } else {
+            loadLocalHistory();
+          }
+        } else {
+          loadLocalHistory();
+        }
       } catch (e) {
-        console.error('Failed to parse history', e);
+        console.error('Failed to fetch from DB', e);
+        loadLocalHistory();
+      } finally {
+        setIsLoading(false);
       }
-    }
-  }, []);
+    };
+
+    const loadLocalHistory = () => {
+      const storedHistory = localStorage.getItem('surveyHistory');
+      if (storedHistory) {
+        try {
+          const parsed = JSON.parse(storedHistory) as SurveyFormData[];
+          const sorted = parsed.sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateB - dateA;
+          });
+          setHistory(sorted);
+        } catch (e) {
+          console.error('Failed to parse history', e);
+        }
+      }
+    };
+
+    fetchSurveys();
+  },[]);
 
   const handleCopy = async (data: SurveyFormData) => {
     const text = generateCrmText(data);
@@ -170,7 +200,11 @@ export default function AdminDashboard() {
           initial="hidden"
           animate="show"
         >
-          {filteredHistory.length === 0 ? (
+          {isLoading ? (
+            <div className="empty-state">
+              <p>서버에서 환자 목록을 불러오는 중입니다...</p>
+            </div>
+          ) : filteredHistory.length === 0 ? (
             <div className="empty-state">
               <FileText size={48} />
               <p>제출된 문진이 없습니다.</p>
