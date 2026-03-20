@@ -14,11 +14,12 @@ function SurveyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const procedure = (searchParams.get('procedure') || 'botox') as ProcedureType;
+  const skipCommon = searchParams.get('skipCommon') === 'true';
 
   const [currentStep, setCurrentStep] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  const { setValue, getValues, watch } = useForm<SurveyFormData>({
+  const { setValue, getValues, watch, reset } = useForm<SurveyFormData>({
     defaultValues: {
       patientName: '',
       createdAt: '',
@@ -66,7 +67,7 @@ function SurveyContent() {
     },
   });
 
-  const steps = getStepsForProcedure(procedure);
+  const steps = getStepsForProcedure(procedure, skipCommon);
   const currentQuestions = steps[currentStep]?.questions || [];
 
   // Watch all form values for re-renders
@@ -90,6 +91,36 @@ function SurveyContent() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 250);
   }, []);
+
+  useEffect(() => {
+    if (skipCommon) {
+      const stored = sessionStorage.getItem('surveyData');
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored) as SurveyFormData;
+          const currentData = getValues();
+          reset({
+            ...currentData,
+            patientName: parsed.patientName,
+            pregnancy: parsed.pregnancy,
+            medications: parsed.medications,
+            medicationDetail: parsed.medicationDetail,
+            allergyLidocaine: parsed.allergyLidocaine,
+            allergyMetal: parsed.allergyMetal,
+            allergyOther: parsed.allergyOther,
+            allergyDetail: parsed.allergyDetail,
+            skinType: parsed.skinType,
+            painSensitivity: parsed.painSensitivity,
+            skinConcerns: parsed.skinConcerns,
+            photoGuide1: parsed.photoGuide1,
+            photoGuide2: parsed.photoGuide2,
+          });
+        } catch (e) {
+          console.error("Failed to parse previous surveyData", e);
+        }
+      }
+    }
+  }, [skipCommon, getValues, reset]);
 
   const handleNext = useCallback(() => {
     if (currentStep < steps.length - 1) {

@@ -151,6 +151,10 @@ export function generateCrmText(data: SurveyFormData): string {
       acneLines.push(`- 요인: 생리 주기 악화/호르몬 요인`);
     }
 
+    if (data.acneTreatmentPreference) {
+      acneLines.push(`- 희망 방향: ${data.acneTreatmentPreference}`);
+    }
+
     if (acneLines.length > 0) {
       lines.push('\n[여드름 분석]');
       lines.push(...acneLines);

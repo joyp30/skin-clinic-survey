@@ -102,8 +102,50 @@ export default function ResultPage() {
         </p>
       </div>
 
+      {/* Add-on procedures */}
+      {data && (
+        <div style={{ 
+          marginTop: '32px', 
+          padding: '24px', 
+          background: 'var(--bg-card)', 
+          border: '1px solid var(--border-subtle)', 
+          borderRadius: '20px',
+          textAlign: 'center'
+        }}>
+          <h3 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '8px', color: 'var(--text-primary)' }}>
+            ➕ 다른 시술도 알아보고 싶으신가요?
+          </h3>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+            공통 건강 정보 질문은 생략하고 내용 문진으로 바로 넘어갑니다.
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
+            {(['botox', 'filler', 'pigment', 'lifting', 'acne'] as ProcedureType[])
+              .filter((p) => !data.procedure.includes(p))
+              .map((p) => (
+                <button
+                  key={p}
+                  onClick={() => router.push(`/survey?procedure=${p}&skipCommon=true`)}
+                  style={{
+                    padding: '10px 20px',
+                    background: 'linear-gradient(135deg, #eef2ff, #e0e7ff)',
+                    color: '#4338ca',
+                    borderRadius: '100px',
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s',
+                  }}
+                >
+                  {procedureLabels[p]} 추가하기
+                </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Actions */}
-      <div className="result-actions" style={{ marginTop: '40px', display: 'flex', justifyContent: 'center' }}>
+      <div className="result-actions" style={{ marginTop: '24px', display: 'flex', justifyContent: 'center' }}>
         <button 
           className="action-btn secondary" 
           onClick={handleReset}

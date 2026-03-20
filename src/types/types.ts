@@ -72,6 +72,7 @@ export interface SurveyFormData {
   acneType: string;
   acneLifestyle: string;
   acneHormone: string;
+  acneTreatmentPreference: string;
 
   // Pigment specific
   pigmentStart: string;

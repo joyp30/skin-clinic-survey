@@ -405,6 +405,19 @@ export const acneQuestions: Question[] = [
     warningMessage: '호르몬 요인 의심 (생리 주기 악화 및 PCOS)',
     required: true,
   },
+  {
+    id: 'acneTreatmentPreference',
+    category: '여드름',
+    text: '주로 희망하시는 여드름 치료 방향을 선택해 주세요.',
+    type: 'radio',
+    options: [
+      { label: '먹는 약 / 바르는 약 처방 위주', value: '약 처방 위주' },
+      { label: '여드름 압출 및 스킨케어 관리', value: '압출/스킨케어 관리' },
+      { label: '레이저 등 적극적인 시술', value: '적극적인 시술(레이저 등)' },
+      { label: '원장님 상담 후 결정', value: '상담 후 결정' },
+    ],
+    required: true,
+  },
 ];
 
 export const bddqQuestions: Question[] = [
@@ -516,14 +529,16 @@ export const skinStatusQuestions: Question[] = [
   },
 ];
 
-export function getStepsForProcedure(procedure: string): SurveyStep[] {
-  const steps: SurveyStep[] = [
-    {
+export function getStepsForProcedure(procedure: string, skipCommon: boolean = false): SurveyStep[] {
+  const steps: SurveyStep[] = [];
+
+  if (!skipCommon) {
+    steps.push({
       title: '기본 건강 정보',
       subtitle: '안전한 시술을 위한 기본 확인사항입니다',
       questions: commonQuestions,
-    },
-  ];
+    });
+  }
 
   const proceduresArray = procedure.split(',').map(p => p.trim());
 
@@ -567,11 +582,13 @@ export function getStepsForProcedure(procedure: string): SurveyStep[] {
     }
   });
 
-  steps.push({
-    title: '피부 상태 확인 및 사진 가이드',
-    subtitle: '정확한 진단을 위한 피부 정보와 촬영 전 체크리스트입니다',
-    questions: [...skinStatusQuestions, ...photoGuideQuestions],
-  });
+  if (!skipCommon) {
+    steps.push({
+      title: '피부 상태 확인 및 사진 가이드',
+      subtitle: '정확한 진단을 위한 피부 정보와 촬영 전 체크리스트입니다',
+      questions: [...skinStatusQuestions, ...photoGuideQuestions],
+    });
+  }
 
   return steps;
 }
