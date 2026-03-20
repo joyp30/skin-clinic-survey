@@ -234,7 +234,7 @@ export default function AdminDashboard() {
                     <Clock size={12} />
                     <span>
                       {survey.createdAt 
-                        ? format(parseISO(survey.createdAt), 'MM/dd HH:mm', { locale: ko }) 
+                        ? format(parseISO(survey.createdAt), 'M월 d일 (EEE) a h:mm', { locale: ko }) 
                         : '시간 정보 없음'}
                     </span>
                     <ChevronRight size={16} className="arrow" />
