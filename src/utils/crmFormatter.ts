@@ -100,7 +100,8 @@ export function generateCrmText(data: SurveyFormData): string {
     history.push(`보톡스 내성 의심${product}`);
   }
   if (data.fillerPrevious === 'yes') {
-    history.push('기존 필러 시술 이력');
+    const lastDate = data.fillerLastDate ? ` (마지막: ${data.fillerLastDate})` : '';
+    history.push(`기존 필러 시술 이력${lastDate}`);
   }
   if (data.fillerNodule === 'yes') {
     history.push('필러 후 결절 경험');

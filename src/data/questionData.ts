@@ -142,8 +142,9 @@ export const botoxQuestions: Question[] = [
     subtext: '(중복 선택 가능)',
     type: 'checkbox',
     options: [
-      { label: '이마/미간', value: '이마/미간' },
-      { label: '눈가(까마귀발)', value: '눈가' },
+      { label: '이마', value: '이마' },
+      { label: '미간', value: '미간' },
+      { label: '눈가', value: '눈가' },
       { label: '턱(사각턱)', value: '사각턱' },
       { label: '승모근(어깨)', value: '승모근' },
       { label: '종아리', value: '종아리' },
@@ -177,6 +178,14 @@ export const fillerQuestions: Question[] = [
     warningOn: 'yes',
     warningMessage: '기존 필러 시술 이력 있음',
     required: true,
+  },
+  {
+    id: 'fillerLastDate',
+    category: '필러',
+    text: '마지막 필러 시술을 받으신 날짜를 입력해 주세요.',
+    subtext: '예: 2024년 3월 / 약 6개월 전 등',
+    type: 'text',
+    required: false,
   },
   {
     id: 'fillerNodule',
@@ -261,14 +270,7 @@ export const photoGuideQuestions: Question[] = [
   {
     id: 'photoGuide1',
     category: '촬영 안내',
-    text: '현재 필터가 적용되지 않은 생얼(세안 직후) 상태이신가요?',
-    type: 'yesno',
-    required: true,
-  },
-  {
-    id: 'photoGuide2',
-    category: '촬영 안내',
-    text: '주변에 자연광이나 밝은 조명이 있나요?',
+    text: '현재 화장기 없는 생얼 상태인가요?',
     type: 'yesno',
     required: true,
   }

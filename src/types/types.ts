@@ -60,6 +60,7 @@ export interface SurveyFormData {
 
   // Filler specific
   fillerPrevious: string;
+  fillerLastDate: string;
   fillerNodule: string;
   fillerInflammation: string;
   fillerArea: string;

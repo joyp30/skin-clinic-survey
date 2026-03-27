@@ -10,13 +10,56 @@ import { SurveyFormData } from '@/types/types';
 import { generateCrmText, copyToClipboard } from '@/utils/crmFormatter';
 import { procedures } from '@/data/questionData';
 
+// A group of surveys submitted by the same patient on the same day
+interface SurveyGroup {
+  key: string; // patientName + date
+  patientName: string;
+  date: string; // YYYY-MM-DD
+  surveys: SurveyFormData[];
+  latestAt: string; // ISO string of most-recent submission
+}
+
+function groupSurveys(history: SurveyFormData[]): SurveyGroup[] {
+  const map = new Map<string, SurveyGroup>();
+
+  for (const survey of history) {
+    const dateStr = survey.createdAt
+      ? format(parseISO(survey.createdAt), 'yyyy-MM-dd')
+      : 'unknown';
+    const key = `${survey.patientName}__${dateStr}`;
+
+    if (!map.has(key)) {
+      map.set(key, {
+        key,
+        patientName: survey.patientName || '',
+        date: dateStr,
+        surveys: [],
+        latestAt: survey.createdAt || '',
+      });
+    }
+
+    const group = map.get(key)!;
+    group.surveys.push(survey);
+    // track the most recent submission time
+    if (survey.createdAt && survey.createdAt > group.latestAt) {
+      group.latestAt = survey.createdAt;
+    }
+  }
+
+  // Sort groups newest-first
+  return Array.from(map.values()).sort((a, b) =>
+    b.latestAt.localeCompare(a.latestAt)
+  );
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [history, setHistory] = useState<SurveyFormData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSurvey, setSelectedSurvey] = useState<SurveyFormData | null>(null);
+  const [selectedGroup, setSelectedGroup] = useState<SurveyGroup | null>(null);
+  const [activeSurveyIndex, setActiveSurveyIndex] = useState(0);
   const [copied, setCopied] = useState(false);
-  
+
   // Auth state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
@@ -29,7 +72,7 @@ export default function AdminDashboard() {
         const res = await fetch('/api/surveys', { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
-          
+
           if (Array.isArray(data)) {
             const sorted = data.sort((a: SurveyFormData, b: SurveyFormData) => {
               const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
@@ -69,7 +112,7 @@ export default function AdminDashboard() {
     };
 
     fetchSurveys();
-  },[]);
+  }, []);
 
   const handleCopy = async (data: SurveyFormData) => {
     const text = generateCrmText(data);
@@ -91,13 +134,26 @@ export default function AdminDashboard() {
 
   const getProcedureName = (idStr: string) => {
     if (!idStr) return '';
-    return idStr.split(',').map(id => procedures.find(p => p.id === id.trim())?.name || id).join(', ');
+    return idStr
+      .split(',')
+      .map(id => procedures.find(p => p.id === id.trim())?.name || id)
+      .join(', ');
   };
 
-  const filteredHistory = history.filter(item => 
-    item.patientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    getProcedureName(item.procedure).toLowerCase().includes(searchTerm.toLowerCase())
+  const groups = groupSurveys(history);
+
+  const filteredGroups = groups.filter(group =>
+    group.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    group.surveys.some(s =>
+      getProcedureName(s.procedure).toLowerCase().includes(searchTerm.toLowerCase())
+    )
   );
+
+  const handleSelectGroup = (group: SurveyGroup) => {
+    setSelectedGroup(group);
+    setActiveSurveyIndex(0);
+    setCopied(false);
+  };
 
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,7 +169,7 @@ export default function AdminDashboard() {
   if (!isAuthenticated) {
     return (
       <main className="admin-page auth-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <motion.div 
+        <motion.div
           className="result-card"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -143,8 +199,10 @@ export default function AdminDashboard() {
     );
   }
 
+  const activeSurvey = selectedGroup?.surveys[activeSurveyIndex] ?? null;
+
   return (
-    <motion.main 
+    <motion.main
       className="admin-page"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
@@ -152,7 +210,7 @@ export default function AdminDashboard() {
       transition={{ duration: 0.5 }}
     >
       <div className="admin-header">
-        <motion.div 
+        <motion.div
           className="admin-title-row"
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -160,7 +218,7 @@ export default function AdminDashboard() {
           <Shield className="admin-icon" size={24} />
           <h1>직원용 문진 현황 대시보드</h1>
         </motion.div>
-        <motion.p 
+        <motion.p
           className="admin-subtitle"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -170,7 +228,7 @@ export default function AdminDashboard() {
         </motion.p>
       </div>
 
-      <motion.div 
+      <motion.div
         className="admin-controls"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -189,14 +247,14 @@ export default function AdminDashboard() {
 
       <div className="admin-content">
         {/* List View */}
-        <motion.div 
-          className={`survey-list ${selectedSurvey ? 'hidden-mobile' : ''}`}
+        <motion.div
+          className={`survey-list ${selectedGroup ? 'hidden-mobile' : ''}`}
           variants={{
             hidden: { opacity: 0 },
             show: {
               opacity: 1,
-              transition: { staggerChildren: 0.05, delayChildren: 0.4 }
-            }
+              transition: { staggerChildren: 0.05, delayChildren: 0.4 },
+            },
           }}
           initial="hidden"
           animate="show"
@@ -205,36 +263,59 @@ export default function AdminDashboard() {
             <div className="empty-state">
               <p>서버에서 환자 목록을 불러오는 중입니다...</p>
             </div>
-          ) : filteredHistory.length === 0 ? (
+          ) : filteredGroups.length === 0 ? (
             <div className="empty-state">
               <FileText size={48} />
               <p>제출된 문진이 없습니다.</p>
             </div>
           ) : (
-            filteredHistory.map((survey, index) => {
-              const bddqScore = calculateBddq(survey);
+            filteredGroups.map((group) => {
+              // Collect unique procedures across all surveys in this group
+              const allProcedures = group.surveys
+                .map(s => getProcedureName(s.procedure))
+                .filter(Boolean)
+                .join(', ');
+
+              const hasWarning = group.surveys.some(s => calculateBddq(s) >= 6);
+              const multiSurvey = group.surveys.length > 1;
+
               return (
-                <motion.div 
-                  key={index} 
+                <motion.div
+                  key={group.key}
                   variants={{
                     hidden: { x: -20, opacity: 0 },
-                    show: { x: 0, opacity: 1 }
+                    show: { x: 0, opacity: 1 },
                   }}
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
-                  className={`survey-list-item ${selectedSurvey === survey ? 'active' : ''}`}
-                  onClick={() => setSelectedSurvey(survey)}
+                  className={`survey-list-item ${selectedGroup?.key === group.key ? 'active' : ''}`}
+                  onClick={() => handleSelectGroup(group)}
                 >
                   <div className="item-main">
-                    <span className="patient-name">{survey.patientName}</span>
-                    <span className="procedure-tag">{getProcedureName(survey.procedure)}</span>
-                    {bddqScore >= 6 && <span className="warning-dot" title="BDDQ 주의" />}
+                    <span className="patient-name">{group.patientName}</span>
+                    <span className="procedure-tag">{allProcedures}</span>
+                    {multiSurvey && (
+                      <span
+                        style={{
+                          fontSize: '0.7rem',
+                          background: 'var(--primary)',
+                          color: '#fff',
+                          borderRadius: '10px',
+                          padding: '1px 7px',
+                          marginLeft: '4px',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {group.surveys.length}건
+                      </span>
+                    )}
+                    {hasWarning && <span className="warning-dot" title="BDDQ 주의" />}
                   </div>
                   <div className="item-meta">
                     <Clock size={12} />
                     <span>
-                      {survey.createdAt 
-                        ? format(parseISO(survey.createdAt), 'M월 d일 (EEE) a h:mm', { locale: ko }) 
+                      {group.latestAt
+                        ? format(parseISO(group.latestAt), 'M월 d일 (EEE) a h:mm', { locale: ko })
                         : '시간 정보 없음'}
                     </span>
                     <ChevronRight size={16} className="arrow" />
@@ -247,43 +328,83 @@ export default function AdminDashboard() {
 
         {/* Detail View */}
         <AnimatePresence>
-          {selectedSurvey && (
-            <motion.div 
+          {selectedGroup && activeSurvey && (
+            <motion.div
               className="survey-detail"
               initial={{ opacity: 0, scale: 0.95, x: 20 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
               exit={{ opacity: 0, scale: 0.95, x: 20 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             >
               <div className="detail-header">
-              <button 
-                className="back-btn mobile-only"
-                onClick={() => setSelectedSurvey(null)}
-              >
-                ← 목록으로
-              </button>
-              <h2>{selectedSurvey.patientName}님 문진 상세</h2>
-              <span className="time-badge">
-                {selectedSurvey.createdAt 
-                  ? format(parseISO(selectedSurvey.createdAt), 'yyyy년 MM월 dd일 HH:mm', { locale: ko }) 
-                  : ''}
-              </span>
-            </div>
-
-            <div className="crm-preview-box">
-              <div className="crm-preview-header">
-                <h3>베가스 CRM 연동용 텍스트</h3>
-                <button 
-                  className={`copy-btn-small ${copied ? 'copied' : ''}`}
-                  onClick={() => handleCopy(selectedSurvey)}
+                <button
+                  className="back-btn mobile-only"
+                  onClick={() => setSelectedGroup(null)}
                 >
-                  {copied ? '복사 완료!' : '복사하기'}
+                  ← 목록으로
                 </button>
+                <h2>{selectedGroup.patientName}님 문진 상세</h2>
+                <span className="time-badge">
+                  {selectedGroup.latestAt
+                    ? format(parseISO(selectedGroup.latestAt), 'yyyy년 MM월 dd일', { locale: ko })
+                    : ''}
+                </span>
               </div>
-              <pre>{generateCrmText(selectedSurvey)}</pre>
-            </div>
-          </motion.div>
-        )}
+
+              {/* Tabs for multiple surveys in same group */}
+              {selectedGroup.surveys.length > 1 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: '8px',
+                    marginBottom: '16px',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  {selectedGroup.surveys.map((s, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => { setActiveSurveyIndex(idx); setCopied(false); }}
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '20px',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontWeight: activeSurveyIndex === idx ? 700 : 400,
+                        background:
+                          activeSurveyIndex === idx
+                            ? 'var(--primary)'
+                            : 'var(--surface-secondary, rgba(255,255,255,0.08))',
+                        color: activeSurveyIndex === idx ? '#fff' : 'var(--text-secondary)',
+                        fontSize: '0.82rem',
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      {getProcedureName(s.procedure) || `시술 ${idx + 1}`}
+                      {s.createdAt && (
+                        <span style={{ marginLeft: '6px', opacity: 0.7, fontSize: '0.75rem' }}>
+                          {format(parseISO(s.createdAt), 'H:mm')}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div className="crm-preview-box">
+                <div className="crm-preview-header">
+                  <h3>베가스 CRM 연동용 텍스트</h3>
+                  <button
+                    className={`copy-btn-small ${copied ? 'copied' : ''}`}
+                    onClick={() => handleCopy(activeSurvey)}
+                  >
+                    {copied ? '복사 완료!' : '복사하기'}
+                  </button>
+                </div>
+                <pre>{generateCrmText(activeSurvey)}</pre>
+              </div>
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
     </motion.main>
