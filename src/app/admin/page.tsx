@@ -233,6 +233,7 @@ export default function AdminDashboard() {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3 }}
+        style={{ display: selectedGroup ? 'none' : 'block' }}
       >
         <div className="search-bar">
           <Search size={18} />
@@ -248,7 +249,8 @@ export default function AdminDashboard() {
       <div className="admin-content">
         {/* List View */}
         <motion.div
-          className={`survey-list ${selectedGroup ? 'hidden-mobile' : ''}`}
+          className="survey-list"
+          style={{ display: selectedGroup ? 'none' : 'flex' }}
           variants={{
             hidden: { opacity: 0 },
             show: {
@@ -338,10 +340,10 @@ export default function AdminDashboard() {
             >
               <div className="detail-header">
                 <button
-                  className="back-btn mobile-only"
+                  className="back-btn"
                   onClick={() => setSelectedGroup(null)}
                 >
-                  ← 목록으로
+                  ← 목록이나 검색 화면으로
                 </button>
                 <h2>{selectedGroup.patientName}님 문진 상세</h2>
                 <span className="time-badge">
