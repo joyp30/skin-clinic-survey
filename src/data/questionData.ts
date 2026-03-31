@@ -52,6 +52,25 @@ export const commonQuestions: Question[] = [
     required: true,
   },
   {
+    id: 'patientGender',
+    category: '기본 정보',
+    text: '성별을 선택해 주세요.',
+    type: 'radio',
+    options: [
+      { label: '남성', value: '남성' },
+      { label: '여성', value: '여성' },
+    ],
+    required: true,
+  },
+  {
+    id: 'patientPhoneLast',
+    category: '기본 정보',
+    text: '전화번호 뒷자리 4자리를 입력해 주세요.',
+    subtext: '동명이인 구분을 위해 사용됩니다.',
+    type: 'text',
+    required: true,
+  },
+  {
     id: 'pregnancy',
     category: '공통',
     text: '현재 임신 중이거나 수유 중이신가요?',
@@ -188,6 +207,14 @@ export const fillerQuestions: Question[] = [
     required: false,
   },
   {
+    id: 'fillerLastArea',
+    category: '필러',
+    text: '마지막에 시술받으신 부위를 입력해 주세요.',
+    subtext: '예: 코, 팔자주름, 입술 등',
+    type: 'text',
+    required: false,
+  },
+  {
     id: 'fillerNodule',
     category: '필러',
     text: '필러 시술 후 결절(덩어리)이 만져진 경험이 있나요?',
@@ -281,7 +308,8 @@ export const pigmentQuestions: Question[] = [
     id: 'pigmentStart',
     category: '색소',
     text: '가장 고민되는 색소(기미/잡티)가 언제부터 눈에 띄기 시작했나요?',
-    type: 'radio',
+    subtext: '(중복 선택 가능)',
+    type: 'checkbox',
     options: [
       { label: '최근 1달 이내', value: '1달 이내' },
       { label: '최근 6개월 이내', value: '6개월 이내' },
@@ -294,7 +322,8 @@ export const pigmentQuestions: Question[] = [
     id: 'pigmentUv',
     category: '색소',
     text: '평소 외부 활동 시간과 선크림 사용 습관은 어떠신가요?',
-    type: 'radio',
+    subtext: '(중복 선택 가능)',
+    type: 'checkbox',
     options: [
       { label: '야외 활동 많음 / 선크림 잘 안 바름 (-)', value: '야외 활동 많음 / 선크림 미사용' },
       { label: '야외 활동 많음 / 선크림 매일 바름', value: '야외 활동 많음 / 선크림 사용' },
@@ -325,8 +354,8 @@ export const liftingQuestions: Question[] = [
     id: 'liftingSleepHabit',
     category: '리프팅',
     text: '평소 가장 자주 취하는 수면 자세를 선택해 주세요.',
-    subtext: '수면 중 눌리는 방향은 안면 비대칭 및 처짐(Anti-Gravity 지수)에 영향을 줍니다.',
-    type: 'radio',
+    subtext: '(중복 선택 가능) 수면 중 눌리는 방향은 안면 비대칭 및 처짐(Anti-Gravity 지수)에 영향을 줍니다.',
+    type: 'checkbox',
     options: [
       { label: '천장을 보고 똑바로 누움', value: '똑바로 누움' },
       { label: '주로 오른쪽으로 돌아누움', value: '우측 누움' },
@@ -411,7 +440,8 @@ export const acneQuestions: Question[] = [
     id: 'acneTreatmentPreference',
     category: '여드름',
     text: '주로 희망하시는 여드름 치료 방향을 선택해 주세요.',
-    type: 'radio',
+    subtext: '(중복 선택 가능)',
+    type: 'checkbox',
     options: [
       { label: '먹는 약 / 바르는 약 처방 위주', value: '약 처방 위주' },
       { label: '여드름 압출 및 스킨케어 관리', value: '압출/스킨케어 관리' },
@@ -498,7 +528,8 @@ export const skinStatusQuestions: Question[] = [
     id: 'painSensitivity',
     category: '피부상태',
     text: '통증에 대한 민감도는 어느 정도인가요?',
-    type: 'radio',
+    subtext: '(중복 선택 가능)',
+    type: 'checkbox',
     options: [
       { label: '민감하지 않음', value: '민감하지 않음' },
       { label: '보통', value: '보통' },

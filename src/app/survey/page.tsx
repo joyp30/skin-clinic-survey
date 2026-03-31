@@ -22,6 +22,8 @@ function SurveyContent() {
   const { setValue, getValues, watch, reset } = useForm<SurveyFormData>({
     defaultValues: {
       patientName: '',
+      patientGender: '',
+      patientPhoneLast: '',
       createdAt: '',
       procedure,
       procedureDetail: '',
@@ -38,6 +40,7 @@ function SurveyContent() {
       botoxArea: '',
       botoxPreviousClinic: '',
       fillerPrevious: '',
+      fillerLastArea: '',
       fillerNodule: '',
       fillerInflammation: '',
       fillerArea: '',
@@ -102,6 +105,8 @@ function SurveyContent() {
           reset({
             ...currentData,
             patientName: parsed.patientName,
+            patientGender: parsed.patientGender,
+            patientPhoneLast: parsed.patientPhoneLast,
             pregnancy: parsed.pregnancy,
             medications: parsed.medications,
             medicationDetail: parsed.medicationDetail,

@@ -51,9 +51,11 @@ export function generateCrmText(data: SurveyFormData): string {
     lines.push(`[주의] ${w}`);
   });
 
-  // --- [이름] Patient Name ---
+  // --- [이름] Patient Name with gender & phone last ---
   if (data.patientName) {
-    lines.push(`[이름] ${data.patientName}`);
+    const genderStr = data.patientGender ? ` (${data.patientGender})` : '';
+    const phoneStr = data.patientPhoneLast ? ` / 📞 끝 ${data.patientPhoneLast}` : '';
+    lines.push(`[이름] ${data.patientName}${genderStr}${phoneStr}`);
   }
 
   // --- [시술] Procedure info ---
@@ -100,8 +102,10 @@ export function generateCrmText(data: SurveyFormData): string {
     history.push(`보톡스 내성 의심${product}`);
   }
   if (data.fillerPrevious === 'yes') {
-    const lastDate = data.fillerLastDate ? ` (마지막: ${data.fillerLastDate})` : '';
-    history.push(`기존 필러 시술 이력${lastDate}`);
+    const lastDate = data.fillerLastDate ? `마지막: ${data.fillerLastDate}` : '';
+    const lastArea = data.fillerLastArea ? `부위: ${data.fillerLastArea}` : '';
+    const detail = [lastDate, lastArea].filter(Boolean).join(', ');
+    history.push(`기존 필러 시술 이력${detail ? ` (${detail})` : ''}`);
   }
   if (data.fillerNodule === 'yes') {
     history.push('필러 후 결절 경험');

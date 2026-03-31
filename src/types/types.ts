@@ -36,6 +36,8 @@ export interface SurveyStep {
 export interface SurveyFormData {
   // Metadata
   patientName: string;
+  patientGender: string;
+  patientPhoneLast: string;
   createdAt?: string;
 
   // Procedure
@@ -61,6 +63,7 @@ export interface SurveyFormData {
   // Filler specific
   fillerPrevious: string;
   fillerLastDate: string;
+  fillerLastArea: string;
   fillerNodule: string;
   fillerInflammation: string;
   fillerArea: string;
