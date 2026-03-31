@@ -38,8 +38,10 @@ function SurveyContent() {
       botoxResistance: '',
       botoxResistanceProduct: '',
       botoxArea: '',
-      botoxPreviousClinic: '',
+      botoxRecentPlace: '',
+      botoxRecentArea: '',
       fillerPrevious: '',
+      fillerPreviousPlace: '',
       fillerLastArea: '',
       fillerNodule: '',
       fillerInflammation: '',
@@ -235,8 +237,12 @@ function SurveyContent() {
               if (question.id === 'medicationDetail' && formValues.medications !== 'yes') return null;
               if (question.id === 'allergyDetail' && formValues.allergyOther !== 'yes') return null;
               if (question.id === 'metalImplantDetail' && formValues.metalImplant !== 'yes') return null;
-              if (question.id === 'botoxPreviousClinic' && formValues.botoxRecent !== 'yes') return null;
+              if (question.id === 'botoxRecentPlace' && formValues.botoxRecent !== 'yes') return null;
+              if (question.id === 'botoxRecentArea' && formValues.botoxRecent !== 'yes') return null;
               if (question.id === 'botoxResistanceProduct' && formValues.botoxResistance !== 'yes') return null;
+              if (question.id === 'fillerPreviousPlace' && formValues.fillerPrevious !== 'yes') return null;
+              if (question.id === 'fillerLastDate' && formValues.fillerPrevious !== 'yes') return null;
+              if (question.id === 'fillerLastArea' && formValues.fillerPrevious !== 'yes') return null;
 
               return (
                 <motion.div

@@ -58,10 +58,12 @@ export interface SurveyFormData {
   botoxResistance: string;
   botoxResistanceProduct: string;
   botoxArea: string;
-  botoxPreviousClinic: string;
+  botoxRecentPlace: string;
+  botoxRecentArea: string;
 
   // Filler specific
   fillerPrevious: string;
+  fillerPreviousPlace: string;
   fillerLastDate: string;
   fillerLastArea: string;
   fillerNodule: string;

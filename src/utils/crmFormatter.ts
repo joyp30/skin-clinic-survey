@@ -92,19 +92,19 @@ export function generateCrmText(data: SurveyFormData): string {
     history.push(`약물 복용 중${medDetail}`);
   }
   if (data.botoxRecent === 'yes') {
-    const clinic = data.botoxPreviousClinic
-      ? ` (${data.botoxPreviousClinic})`
-      : ' (타원)';
-    history.push(`최근 6개월 내 보톡스 시술${clinic}`);
+    const place = data.botoxRecentPlace || '미기재';
+    const area = data.botoxRecentArea ? `, 부위: ${data.botoxRecentArea}` : '';
+    history.push(`최근 6개월 내 보톡스 시술 (${place}${area})`);
   }
   if (data.botoxResistance === 'yes') {
     const product = data.botoxResistanceProduct ? ` (${data.botoxResistanceProduct})` : '';
     history.push(`보톡스 내성 의심${product}`);
   }
   if (data.fillerPrevious === 'yes') {
+    const place = data.fillerPreviousPlace || '미기재';
     const lastDate = data.fillerLastDate ? `마지막: ${data.fillerLastDate}` : '';
     const lastArea = data.fillerLastArea ? `부위: ${data.fillerLastArea}` : '';
-    const detail = [lastDate, lastArea].filter(Boolean).join(', ');
+    const detail = [place, lastDate, lastArea].filter(Boolean).join(', ');
     history.push(`기존 필러 시술 이력${detail ? ` (${detail})` : ''}`);
   }
   if (data.fillerNodule === 'yes') {
