@@ -18,6 +18,7 @@ function SurveyContent() {
 
   const [currentStep, setCurrentStep] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const [unansweredIds, setUnansweredIds] = useState<string[]>([]);
 
   const { setValue, getValues, watch, reset } = useForm<SurveyFormData>({
     defaultValues: {
@@ -130,11 +131,43 @@ function SurveyContent() {
   }, [skipCommon, getValues, reset]);
 
   const handleNext = useCallback(() => {
+    // Validate required fields in current step
+    const data = getValues();
+    const visibleQuestions = currentQuestions.filter(q => {
+      if (q.id === 'medicationDetail' && data.medications !== 'yes') return false;
+      if (q.id === 'allergyDetail' && data.allergyOther !== 'yes') return false;
+      if (q.id === 'metalImplantDetail' && data.metalImplant !== 'yes') return false;
+      if (q.id === 'botoxRecentPlace' && data.botoxRecent !== 'yes') return false;
+      if (q.id === 'botoxRecentArea' && data.botoxRecent !== 'yes') return false;
+      if (q.id === 'botoxResistanceProduct' && data.botoxResistance !== 'yes') return false;
+      if (q.id === 'fillerPreviousPlace' && data.fillerPrevious !== 'yes') return false;
+      if (q.id === 'fillerLastDate' && data.fillerPrevious !== 'yes') return false;
+      if (q.id === 'fillerLastArea' && data.fillerPrevious !== 'yes') return false;
+      return true;
+    });
+
+    const missing = visibleQuestions
+      .filter(q => q.required && !data[q.id]?.trim())
+      .map(q => q.id);
+
+    if (missing.length > 0) {
+      setUnansweredIds(missing);
+      // Scroll to first missing field
+      setTimeout(() => {
+        const el = document.getElementById(`question-${missing[0]}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+      // Clear after animation
+      setTimeout(() => setUnansweredIds([]), 2500);
+      return;
+    }
+
+    setUnansweredIds([]);
+
     if (currentStep < steps.length - 1) {
       transitionTo(currentStep + 1);
     } else {
       // Survey complete — set timestamp, store data and navigate to result
-      const data = getValues();
       data.createdAt = new Date().toISOString();
       
       // Save for current session (Result page)
@@ -156,7 +189,7 @@ function SurveyContent() {
 
       router.push('/result');
     }
-  }, [currentStep, steps.length, transitionTo, getValues, router]);
+  }, [currentStep, steps.length, transitionTo, getValues, router, currentQuestions]);
 
   const handlePrev = useCallback(() => {
     if (currentStep > 0) {
@@ -247,10 +280,12 @@ function SurveyContent() {
               return (
                 <motion.div
                   key={question.id}
+                  id={`question-${question.id}`}
                   variants={{
                     hidden: { opacity: 0, y: 20 },
                     show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
                   }}
+                  className={unansweredIds.includes(question.id) ? 'question-unanswered' : ''}
                 >
                   <QuestionCard
                     question={question}

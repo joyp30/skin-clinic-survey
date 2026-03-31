@@ -461,6 +461,28 @@ body {
   box-shadow: 0 4px 20px rgba(239, 68, 68, 0.1);
 }
 
+/* Unanswered required question validation */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+.question-unanswered .question-card {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2), 0 4px 20px rgba(239, 68, 68, 0.15) !important;
+  animation: shake 0.5s ease-in-out;
+}
+
+.question-unanswered .question-text::after {
+  content: ' ← 필수 항목입니다';
+  color: var(--danger);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
 .question-header {
   margin-bottom: 20px;
 }
