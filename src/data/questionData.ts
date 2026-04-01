@@ -49,6 +49,14 @@ export const procedures: ProcedureInfo[] = [
     description: '흉터 정밀 진단 빛 맞춤 치료',
     color: '#ef4444',
   },
+  {
+    id: 'pore',
+    name: '모공 집중 케어',
+    nameEn: 'Pores',
+    icon: '🔍',
+    description: '모공 원인 분석 및 피부결 개선',
+    color: '#0ea5e9',
+  },
 ];
 
 export const commonQuestions: Question[] = [
@@ -617,6 +625,7 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
   const proceduresArray = procedure.split(',').map(p => p.trim());
 
   let hasScar = false;
+  let hasPore = false;
 
   proceduresArray.forEach(proc => {
     switch (proc) {
@@ -658,8 +667,118 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
       case 'scar':
         hasScar = true;
         break;
+      case 'pore':
+        hasPore = true;
+        break;
     }
   });
+
+  // Handle pore dynamic logic separately
+  if (hasPore) {
+    steps.push({
+      title: '모공 집중 정보 (1/3)',
+      subtitle: '환자분께서 느끼는 모공의 가장 큰 특징을 선택해 주세요',
+      questions: [{
+        id: 'poreCause',
+        category: '모공',
+        text: '현재 가장 신경 쓰이는 모공의 상태는 어떤가요?',
+        type: 'radio',
+        options: [
+          { label: '💧 T존이 번들거리고 모공이 동그랗게 도드라짐 (유분 과다형)', value: '유분과다' },
+          { label: '🍐 모공이 타원형이나 물방울 모양으로 아래로 처져 보임 (탄력 저하형)', value: '탄력저하' },
+          { label: '🌑 모공 속에 블랙헤드/화이트헤드가 껴있고 요철이 느껴짐 (노폐물 적체형)', value: '노폐물적체' },
+          { label: '잘 모르겠음 / 복합적임', value: '복합' },
+        ],
+        required: true,
+      }]
+    });
+
+    if (formValues?.poreCause) {
+      if (formValues.poreCause === '유분과다') {
+        steps.push({
+          title: '유분 과다형 상세 분석',
+          subtitle: '평소 관리 습관을 파악합니다',
+          questions: [{
+            id: 'poreOilyHabit',
+            category: '모공',
+            text: '평소 기름종이를 자주 사용하시거나, 뽀득뽀득하게 닦이는 세정력이 강한 클렌저를 주로 쓰시나요?',
+            type: 'yesno',
+            required: true,
+          }]
+        });
+      } else if (formValues.poreCause === '탄력저하') {
+         steps.push({
+          title: '탄력 저하형 상세 분석',
+          subtitle: '모공 늘어짐이 가장 심한 부위는 어디인가요?',
+          questions: [{
+            id: 'poreAgingArea',
+            category: '모공',
+            text: '어느 부위의 모공이 가장 길게 늘어져 보이나요?',
+            subtext: '(중복 선택 가능)',
+            type: 'checkbox',
+            options: [
+              { label: '코 옆 나비존', value: '나비존' },
+              { label: '앞볼 전체', value: '앞볼' },
+              { label: '턱 라인 주변', value: '턱주변' },
+              { label: '이마', value: '이마' },
+            ],
+            required: true,
+          }]
+        });
+      } else if (formValues.poreCause === '노폐물적체' || formValues.poreCause === '복합') {
+        steps.push({
+          title: '노폐물 적체형 상세 분석',
+          subtitle: '모공 관리 습관을 확인합니다',
+          questions: [{
+            id: 'poreCloggedHabit',
+            category: '모공',
+            text: '블랙헤드나 피지를 손으로 직접 짜거나, 코팩 등 물리적으로 뽑아내는 방식을 자주 사용하시나요?',
+            subtext: '무리한 자극 여부를 파악하기 위함입니다.',
+            type: 'yesno',
+            warningOn: 'yes',
+            warningMessage: '피지 손으로 짜는 습관 (모공 영구 확장 위험)',
+            popupMessage: '손으로 피지를 짜거나 자극적인 코팩을 사용하면, 표피에 미세한 상처가 생기고 모공 주변 콜라겐 섬유가 끊어져 모공이 영구적으로 넓어질 위험이 매우 높습니다! 오늘부터 절대 손대지 마시고 병원 관리를 받아주세요.',
+            required: true,
+          }]
+        });
+      }
+
+      // Check leaf condition to show final common pore step
+      const isPoreLeafReached = (
+        (formValues.poreCause === '유분과다' && formValues.poreOilyHabit) ||
+        (formValues.poreCause === '탄력저하' && formValues.poreAgingArea) ||
+        ((formValues.poreCause === '노폐물적체' || formValues.poreCause === '복합') && formValues.poreCloggedHabit)
+      );
+
+      if (isPoreLeafReached) {
+        steps.push({
+          title: '공통 위험요인 확인 (3/3)',
+          subtitle: '모공 시술에 영향을 줄 수 있는 요인입니다',
+          questions: [
+            {
+              id: 'poreIsotretinoin',
+              category: '모공',
+              text: '최근 6개월 이내에 피지 조절제(이소트레티노인, 에이콘알, 로아큐탄 등)를 복용하신 적이 있나요?',
+              subtext: '피부 건조 및 재생 속도 확인을 위한 필수 질문입니다.',
+              type: 'yesno',
+              warningOn: 'yes',
+              warningMessage: '이소트레티노인 최근 6개월 내 복용',
+              required: true,
+            },
+            {
+              id: 'poreLaserPeeling',
+              category: '모공',
+              text: '최근 4주 내에 얼굴에 강한 레이저, 박피술(필링), 제모 시술을 받았거나 강한 자외선(태닝)에 노출된 적이 있나요?',
+              type: 'yesno',
+              warningOn: 'yes',
+              warningMessage: '최근 4주 내 레이저/필링/태닝 이력',
+              required: true,
+            }
+          ]
+        });
+      }
+    }
+  }
 
   // Handle scar dynamic logic separately to allow break checks
   if (hasScar) {

@@ -1,4 +1,4 @@
-export type ProcedureType = 'botox' | 'filler' | 'pigment' | 'lifting' | 'acne' | 'scar';
+export type ProcedureType = 'botox' | 'filler' | 'pigment' | 'lifting' | 'acne' | 'scar' | 'pore';
 
 export interface ProcedureInfo {
   id: ProcedureType;
@@ -24,6 +24,7 @@ export interface Question {
   options?: QuestionOption[];
   warningOn?: string; // value that triggers a warning
   warningMessage?: string;
+  popupMessage?: string; // real-time alert message shown directly in UI
   required?: boolean;
 }
 
@@ -96,6 +97,14 @@ export interface SurveyFormData {
   scarExpectation: string;
   scarSmoking: string;
   scarMedication: string;
+
+  // Pore specific
+  poreCause: string;
+  poreOilyHabit: string;
+  poreAgingArea: string;
+  poreCloggedHabit: string;
+  poreIsotretinoin: string;
+  poreLaserPeeling: string;
 
   // Pigment specific
   pigmentStart: string;

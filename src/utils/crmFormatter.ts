@@ -16,6 +16,7 @@ const procedureNames: Record<string, string> = {
   lifting: '리프팅 및 콜라겐부스터',
   acne: '여드름',
   scar: '흉터',
+  pore: '모공 집중 케어',
 };
 
 export function generateCrmText(data: SurveyFormData): string {
@@ -209,6 +210,54 @@ export function generateCrmText(data: SurveyFormData): string {
       lines.push('\n[흉터 정보]');
       lines.push(...scarLines);
       lines.push(''); // add empty line to separate visually
+    }
+  }
+
+  // --- [모공 집중 분석] Pore specific ---
+  if (data.procedure.includes('pore')) {
+    const poreLines: string[] = [];
+    
+    // Type classification
+    let typeDisplay = data.poreCause || '미기재';
+    if (data.poreCause === '유분과다') typeDisplay = '유분 과다형 (가로 모공)';
+    else if (data.poreCause === '탄력저하') typeDisplay = '탄력 저하형 (세로 모공)';
+    else if (data.poreCause === '노폐물적체') typeDisplay = '노폐물 정체형 (요철, 화이트헤드)';
+
+    poreLines.push(`■ 진단유형: ${typeDisplay}`);
+    
+    // Sensitivities and type (from common skin section if available)
+    const skinType = data.skinType || '미기재';
+    const sensitivity = data.painSensitivity || '미기재';
+    poreLines.push(`■ 피부타입/민감도: ${skinType} / ${sensitivity}`);
+
+    // Habits & Area
+    const habits: string[] = [];
+    if (data.poreAgingArea) habits.push(`주요 부위(${data.poreAgingArea})`);
+    if (data.poreOilyHabit === 'yes') habits.push('기름종이/강한클렌저 잦음');
+    if (data.poreCloggedHabit === 'yes') habits.push('손으로 피지 짜거나 코팩 자주함');
+    
+    if (habits.length > 0) {
+      poreLines.push(`■ 원인/습관: ${habits.join(' / ')}`);
+    }
+
+    // Medication & Conditions
+    const meds: string[] = [];
+    meds.push(data.poreIsotretinoin === 'yes' ? '이소트레티노인 복용(유)' : '이소트레티노인 복용(무)');
+    meds.push(data.pregnancy === 'yes' ? '임신/수유(유)' : '임신/수유(무)');
+    if (data.allergyLidocaine === 'yes') meds.push('리도카인 알레르기(유)');
+    else meds.push('리도카인 알레르기(무)');
+    
+    poreLines.push(`■ 약물/금기: ${meds.join(' / ')}`);
+
+    // Special items
+    if (data.poreLaserPeeling === 'yes') {
+      poreLines.push('■ 특이사항: 최근 4주내 레이저/필링/태닝 이력 있음 (주의)');
+    }
+
+    if (poreLines.length > 0) {
+      lines.push('\n[모공 집중 분석]');
+      lines.push(...poreLines);
+      lines.push(''); // add empty line
     }
   }
 

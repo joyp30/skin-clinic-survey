@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Question } from '@/types/types';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface QuestionCardProps {
   question: Question;

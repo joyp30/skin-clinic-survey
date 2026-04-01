@@ -21,6 +21,7 @@ const procedureLabels: Record<ProcedureType, string> = {
   lifting: '리프팅 및 콜라겐부스터',
   acne: '여드름',
   scar: '흉터',
+  pore: '모공 집중 케어',
 };
 
 export default function ResultPage() {
