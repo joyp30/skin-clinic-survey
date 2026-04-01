@@ -41,6 +41,14 @@ export const procedures: ProcedureInfo[] = [
     description: '여드름 진단 및 맞춤 치료',
     color: '#8b5cf6',
   },
+  {
+    id: 'scar',
+    name: '흉터',
+    nameEn: 'Scar',
+    icon: '🩹',
+    description: '흉터 정밀 진단 빛 맞춤 치료',
+    color: '#ef4444',
+  },
 ];
 
 export const commonQuestions: Question[] = [
@@ -595,7 +603,7 @@ export const skinStatusQuestions: Question[] = [
   },
 ];
 
-export function getStepsForProcedure(procedure: string, skipCommon: boolean = false): SurveyStep[] {
+export function getStepsForProcedure(procedure: string, skipCommon: boolean = false, formValues?: Record<string, any>): SurveyStep[] {
   const steps: SurveyStep[] = [];
 
   if (!skipCommon) {
@@ -607,6 +615,8 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
   }
 
   const proceduresArray = procedure.split(',').map(p => p.trim());
+
+  let hasScar = false;
 
   proceduresArray.forEach(proc => {
     switch (proc) {
@@ -645,8 +655,261 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
           questions: acneQuestions,
         });
         break;
+      case 'scar':
+        hasScar = true;
+        break;
     }
   });
+
+  // Handle scar dynamic logic separately to allow break checks
+  if (hasScar) {
+    steps.push({
+      title: '흉터 기본 정보 (1/5)',
+      subtitle: '흉터의 종류를 파악합니다',
+      questions: [{
+        id: 'scarCause',
+        category: '흉터',
+        text: '어떤 원인으로 생긴 흉터인가요?',
+        type: 'radio',
+        options: [
+          { label: '여드름 흉터', value: '여드름' },
+          { label: '상처 및 외상', value: '상처' },
+          { label: '수술 흉터', value: '수술' },
+          { label: '기타/잘 모르겠음', value: '기타' },
+        ],
+        required: true,
+      }]
+    });
+
+    if (formValues?.scarCause) {
+      steps.push({
+        title: '흉터 기본 정보 (2/5)',
+        subtitle: '발생 시기를 파악합니다',
+        questions: [{
+          id: 'scarDuration',
+          category: '흉터',
+          text: '해당 흉터가 생긴 지 얼마나 되었나요?',
+          type: 'radio',
+          options: [
+            { label: '6개월 미만', value: '6개월 미만' },
+            { label: '6개월 ~ 1년', value: '6개월~1년' },
+            { label: '1년 이상', value: '1년 이상' },
+          ],
+          required: true,
+        }]
+      });
+
+      if (formValues?.scarDuration) {
+        if (formValues.scarCause === '여드름') {
+          steps.push({
+            title: '여드름 흉터 상세진단',
+            subtitle: '가장 고민되는 흉터 1가지를 파악합니다',
+            questions: [{
+              id: 'scarAcneShape',
+              category: '흉터',
+              text: '환자분이 느끼시기에 어떤 형태의 흉터가 고민이신가요?',
+              subtext: '아래 가이드를 참고하여 골라주세요.',
+              type: 'radio',
+              options: [
+                { label: '🧊 송곳 모양(Icepick) - 좁고 깊게 패임', value: 'Icepick' },
+                { label: '📦 박스 모양(Boxcar) - 경계 뚜렷, 넓게 패임', value: 'Boxcar' },
+                { label: '🌊 완만한 굴곡(Rolling) - 피부가 울퉁불퉁', value: 'Rolling' },
+                { label: '잘 모르겠음', value: '잘 모르겠음' },
+              ],
+              required: true,
+            }]
+          });
+
+          if (formValues.scarAcneShape) {
+            steps.push({
+              title: '여드름 흉터 상세진단',
+              subtitle: '현재 동반 증상 여부',
+              questions: [{
+                id: 'scarAcnePie',
+                category: '흉터',
+                text: '현재 흉터 부위에 붉은 자국이나 색소 침착 등이 동반되나요?',
+                type: 'radio',
+                options: [
+                  { label: '현재 여드름이 계속 나고 있음', value: '여드름 진행중' },
+                  { label: '붉은 자국이 심하게 있음', value: '붉은 자국' },
+                  { label: '거뭇거뭇한 색소 침착 위주', value: '색소 침착' },
+                  { label: '해당 없고 흉터만 파여 있음', value: '해당 없음' },
+                ],
+                required: true,
+              }]
+            });
+          }
+        } else if (formValues.scarCause === '상처') {
+          steps.push({
+            title: '상처/외상 흉터 상세진단',
+            subtitle: '흉터 생성 원인 파악',
+            questions: [{
+              id: 'scarTraumaOrigin',
+              category: '흉터',
+              text: '상처가 난 과정을 선택해 주세요.',
+              type: 'radio',
+              options: [
+                { label: '보통의 긁힘/찰과상', value: '찰과상' },
+                { label: '화상으로 인한 상처', value: '화상' },
+                { label: '날카로운 도구/물체에 베임', value: '베임' },
+                { label: '기타/잘 모르겠음', value: '기타' },
+              ],
+              required: true,
+            }]
+          });
+
+          if (formValues.scarTraumaOrigin) {
+            steps.push({
+              title: '상처/외상 흉터 표면',
+              subtitle: '흉터 상태 파악',
+              questions: [{
+                id: 'scarTraumaStatus',
+                category: '흉터',
+                text: '현재 흉터 표면의 양상이 어떤가요?',
+                type: 'radio',
+                options: [
+                  { label: '피부가 패이고 함몰됨', value: '함몰' },
+                  { label: '살이 위로 튀어나오고 부풀어오름', value: '돌출' },
+                  { label: '표면은 매끄럽지만 색만 다름', value: '색상 변화' },
+                  { label: '복합적임', value: '복합' },
+                ],
+                required: true,
+              }]
+            });
+          }
+        } else if (formValues.scarCause === '수술') {
+          steps.push({
+            title: '수술 흉터 상세진단',
+            subtitle: '수술의 종류 파악',
+            questions: [{
+              id: 'scarSurgicalType',
+              category: '흉터',
+              text: '어떤 수술로 인해 생긴 흉터인가요?',
+              type: 'radio',
+              options: [
+                { label: '제왕절개', value: '제왕절개' },
+                { label: '쌍꺼풀 등 소형 미용성형 수술', value: '미용성형' },
+                { label: '일반 외과 수술 등 (큰 흉터)', value: '외과수술' },
+                { label: '기타/잘 모르겠음', value: '기타' },
+              ],
+              required: true,
+            }]
+          });
+
+          if (formValues.scarSurgicalType) {
+            steps.push({
+              title: '수술 흉터 관리 유무',
+              subtitle: '현재 처치 상태 파악',
+              questions: [{
+                id: 'scarSurgicalCare',
+                category: '흉터',
+                text: '현재 흉터 연고나 테이프(스테리스트립) 등을 사용 중이신가요?',
+                type: 'radio',
+                options: [
+                  { label: '네, 현재 지속적으로 관리 중입니다', value: '관리 중' },
+                  { label: '아니오, 따로 관리하지 않습니다', value: '관리 안함' },
+                ],
+                required: true,
+              }]
+            });
+          }
+        }
+
+        // Only show common POSAS and expectation if they have answered the leaf node
+        const isLeafReached = (
+          (formValues.scarCause === '여드름' && formValues.scarAcnePie) ||
+          (formValues.scarCause === '상처' && formValues.scarTraumaStatus) ||
+          (formValues.scarCause === '수술' && formValues.scarSurgicalCare) ||
+          (formValues.scarCause === '기타')
+        );
+
+        if (isLeafReached) {
+          steps.push({
+            title: '임상 평가 척도: 통증 (3/5)',
+            subtitle: 'POSAS 기준 통증 (1~5점)',
+            questions: [{
+              id: 'scarPosasPain',
+              category: '흉터',
+              text: '현재 흉터 부위에 통증이 있나요?',
+              type: 'radio',
+              options: [
+                { label: '1단계 - 전혀 아프지 않음', value: '1' },
+                { label: '2단계 - 아주 약간 아픔', value: '2' },
+                { label: '3단계 - 보통 수준의 통증', value: '3' },
+                { label: '4단계 - 자주 아프고 꽤 불편함', value: '4' },
+                { label: '5단계 - 심각한 통증 때문에 괴로움', value: '5' },
+              ],
+              required: true,
+            }]
+          });
+
+          if (formValues.scarPosasPain) {
+            steps.push({
+              title: '임상 평가 척도: 가려움 (4/5)',
+              subtitle: 'POSAS 기준 가려움 (1~5점)',
+              questions: [{
+                id: 'scarPosasItch',
+                category: '흉터',
+                text: '현재 흉터 부위가 가려우신가요?',
+                type: 'radio',
+                options: [
+                  { label: '1단계 - 전혀 가렵지 않음', value: '1' },
+                  { label: '2단계 - 아주 약간 간지러움', value: '2' },
+                  { label: '3단계 - 보통 수준의 가려움', value: '3' },
+                  { label: '4단계 - 많이 가려워 긁게 됨', value: '4' },
+                  { label: '5단계 - 미칠 듯이 가려움', value: '5' },
+                ],
+                required: true,
+              }]
+            });
+
+            if (formValues.scarPosasItch) {
+              steps.push({
+                title: '치료 기대치 및 위험요인 (5/5)',
+                subtitle: '안전하고 만족스러운 시술을 위한 질문입니다.',
+                questions: [
+                  {
+                    id: 'scarKeloid',
+                    category: '흉터',
+                    text: '과거에 상처가 났을 때 원래 크기보다 월등히 크게 튀어오른 적이 있나요?',
+                    subtext: '(켈로이드 체질 여부)',
+                    type: 'yesno',
+                    warningOn: 'yes',
+                    warningMessage: '켈로이드 체질 가능성',
+                    required: true,
+                  },
+                  {
+                    id: 'scarExpectation',
+                    category: '흉터',
+                    text: '어느 정도의 개선 효과를 원하시나요?',
+                    subtext: '흉터의 종류에 따라 완벽한 제거가 불가능할 수도 있습니다.',
+                    type: 'radio',
+                    options: [
+                      { label: '지금 내 상태에서 조금만 눈에 덜 띄어도 좋음', value: '조금 완화' },
+                      { label: '적어도 50% 이상 뚜렷한 개선 희망', value: '50% 이상' },
+                      { label: '눈에 보이지 않을 만큼 완벽하게 지워지길 희망', value: '완벽 제거' },
+                      { label: '원장님 설명과 진단에 따르겠음', value: '진단에 따름' },
+                    ],
+                    required: true,
+                  },
+                  {
+                    id: 'scarSmoking',
+                    category: '흉터',
+                    text: '현재 담배를 피우고 계신가요?',
+                    subtext: '흡연은 조직의 재생과 회복을 크게 지연시킬 수 있습니다.',
+                    type: 'yesno',
+                    warningOn: 'yes',
+                    warningMessage: '흡연 (조직 회복 지연 위험)',
+                    required: true,
+                  }
+                ]
+              });
+            }
+          }
+        }
+      }
+    }
+  }
 
   if (!skipCommon) {
     steps.push({

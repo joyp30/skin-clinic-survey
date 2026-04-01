@@ -15,6 +15,7 @@ const procedureNames: Record<string, string> = {
   pigment: '색소',
   lifting: '리프팅 및 콜라겐부스터',
   acne: '여드름',
+  scar: '흉터',
 };
 
 export function generateCrmText(data: SurveyFormData): string {
@@ -163,6 +164,50 @@ export function generateCrmText(data: SurveyFormData): string {
     if (acneLines.length > 0) {
       lines.push('\n[여드름 분석]');
       lines.push(...acneLines);
+      lines.push(''); // add empty line to separate visually
+    }
+  }
+
+  // --- [흉터 정보] Scar specific ---
+  if (data.procedure.includes('scar')) {
+    const scarLines: string[] = [];
+    scarLines.push(`■ 원인: ${data.scarCause || '미기재'}`);
+    scarLines.push(`■ 시기: ${data.scarDuration || '미기재'} / 켈로이드: ${data.scarKeloid || '미기재'}`);
+    
+    let pattern = '미기재';
+    if (data.scarCause === '여드름') {
+      const parts = [];
+      if (data.scarAcneShape) parts.push(`형태(${data.scarAcneShape})`);
+      if (data.scarAcneCurrent) parts.push(`현재진행 여부(${data.scarAcneCurrent})`);
+      if (data.scarAcnePie) parts.push(`색소/동반증상(${data.scarAcnePie})`);
+      if (parts.length > 0) pattern = parts.join(', ');
+    } else if (data.scarCause === '상처') {
+      pattern = `상태(${data.scarTraumaStatus || '미기재'}) / 상세원인(${data.scarTraumaOrigin || '미기재'})`;
+    } else if (data.scarCause === '수술') {
+      pattern = `수술기원(${data.scarSurgicalType || '미기재'}) / 처치상태(${data.scarSurgicalCare || '미기재'})`;
+    }
+    
+    scarLines.push(`■ 양상: ${pattern}`);
+    
+    const pain = parseInt(data.scarPosasPain) || 0;
+    const itch = parseInt(data.scarPosasItch) || 0;
+    scarLines.push(`■ POSAS 점수: 통증 ${data.scarPosasPain || '미기재'}, 가려움 ${data.scarPosasItch || '미기재'}`);
+    
+    scarLines.push(`■ 기대치: ${data.scarExpectation || '미기재'}`);
+    
+    const specialVars = [];
+    if (data.scarSmoking === 'yes') specialVars.push('흡연(유)');
+    if (data.scarSmoking === 'no') specialVars.push('흡연(무)');
+    if (data.scarMedication && data.scarMedication !== '없음') specialVars.push(`약물(${data.scarMedication})`);
+    if (specialVars.length > 0) scarLines.push(`■ 특이사항: ${specialVars.join(', ')}`);
+
+    if (pain >= 4 || itch >= 4) {
+      scarLines.push('\n[🚨 긴급 상담 필요: 통증/가려움 심함]');
+    }
+
+    if (scarLines.length > 0) {
+      lines.push('\n[흉터 정보]');
+      lines.push(...scarLines);
       lines.push(''); // add empty line to separate visually
     }
   }

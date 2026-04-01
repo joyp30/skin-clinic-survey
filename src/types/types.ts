@@ -1,4 +1,4 @@
-export type ProcedureType = 'botox' | 'filler' | 'pigment' | 'lifting' | 'acne';
+export type ProcedureType = 'botox' | 'filler' | 'pigment' | 'lifting' | 'acne' | 'scar';
 
 export interface ProcedureInfo {
   id: ProcedureType;
@@ -79,6 +79,23 @@ export interface SurveyFormData {
   acneLifestyle: string;
   acneHormone: string;
   acneTreatmentPreference: string;
+
+  // Scar specific
+  scarCause: string;
+  scarDuration: string;
+  scarPosasPain: string;
+  scarPosasItch: string;
+  scarKeloid: string;
+  scarAcneShape: string;
+  scarAcneCurrent: string;
+  scarAcnePie: string;
+  scarTraumaOrigin: string;
+  scarTraumaStatus: string;
+  scarSurgicalType: string;
+  scarSurgicalCare: string;
+  scarExpectation: string;
+  scarSmoking: string;
+  scarMedication: string;
 
   // Pigment specific
   pigmentStart: string;

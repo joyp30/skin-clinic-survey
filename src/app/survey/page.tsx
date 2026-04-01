@@ -52,6 +52,21 @@ function SurveyContent() {
       acneType: '',
       acneLifestyle: '',
       acneHormone: '',
+      scarCause: '',
+      scarDuration: '',
+      scarPosasPain: '',
+      scarPosasItch: '',
+      scarKeloid: '',
+      scarAcneShape: '',
+      scarAcneCurrent: '',
+      scarAcnePie: '',
+      scarTraumaOrigin: '',
+      scarTraumaStatus: '',
+      scarSurgicalType: '',
+      scarSurgicalCare: '',
+      scarExpectation: '',
+      scarSmoking: '',
+      scarMedication: '',
       pigmentStart: '',
       pigmentUv: '',
       pigmentType: '',
@@ -73,11 +88,11 @@ function SurveyContent() {
     },
   });
 
-  const steps = getStepsForProcedure(procedure, skipCommon);
-  const currentQuestions = steps[currentStep]?.questions || [];
-
   // Watch all form values for re-renders
   const formValues = watch();
+
+  const steps = getStepsForProcedure(procedure, skipCommon, formValues);
+  const currentQuestions = steps[currentStep]?.questions || [];
 
   const handleFieldChange = useCallback(
     (fieldId: string, value: string) => {
