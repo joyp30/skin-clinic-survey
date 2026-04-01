@@ -175,18 +175,22 @@ export function generateCrmText(data: SurveyFormData): string {
     scarLines.push(`■ 원인: ${data.scarCause || '미기재'}`);
     scarLines.push(`■ 시기: ${data.scarDuration || '미기재'} / 켈로이드: ${data.scarKeloid || '미기재'}`);
     
-    let pattern = '미기재';
-    if (data.scarCause === '여드름') {
+    let patternParts = [];
+    if (data.scarCause && data.scarCause.includes('여드름')) {
       const parts = [];
       if (data.scarAcneShape) parts.push(`형태(${data.scarAcneShape})`);
       if (data.scarAcneCurrent) parts.push(`현재진행 여부(${data.scarAcneCurrent})`);
       if (data.scarAcnePie) parts.push(`색소/동반증상(${data.scarAcnePie})`);
-      if (parts.length > 0) pattern = parts.join(', ');
-    } else if (data.scarCause === '상처') {
-      pattern = `상태(${data.scarTraumaStatus || '미기재'}) / 상세원인(${data.scarTraumaOrigin || '미기재'})`;
-    } else if (data.scarCause === '수술') {
-      pattern = `수술기원(${data.scarSurgicalType || '미기재'}) / 처치상태(${data.scarSurgicalCare || '미기재'})`;
+      if (parts.length > 0) patternParts.push(`[여드름] ${parts.join(', ')}`);
     }
+    if (data.scarCause && data.scarCause.includes('상처')) {
+      patternParts.push(`[상처] 상태(${data.scarTraumaStatus || '미기재'}) / 상세원인(${data.scarTraumaOrigin || '미기재'})`);
+    }
+    if (data.scarCause && data.scarCause.includes('수술')) {
+      patternParts.push(`[수술] 수술기원(${data.scarSurgicalType || '미기재'}) / 처치상태(${data.scarSurgicalCare || '미기재'})`);
+    }
+    
+    let pattern = patternParts.length > 0 ? patternParts.join(' | ') : '미기재';
     
     scarLines.push(`■ 양상: ${pattern}`);
     
@@ -219,9 +223,14 @@ export function generateCrmText(data: SurveyFormData): string {
     
     // Type classification
     let typeDisplay = data.poreCause || '미기재';
-    if (data.poreCause === '유분과다') typeDisplay = '유분 과다형 (가로 모공)';
-    else if (data.poreCause === '탄력저하') typeDisplay = '탄력 저하형 (세로 모공)';
-    else if (data.poreCause === '노폐물적체') typeDisplay = '노폐물 정체형 (요철, 화이트헤드)';
+    if (data.poreCause) {
+      const types = [];
+      if (data.poreCause.includes('유분과다')) types.push('유분 과다형 (가로 모공)');
+      if (data.poreCause.includes('탄력저하')) types.push('탄력 저하형 (세로 모공)');
+      if (data.poreCause.includes('노폐물적체')) types.push('노폐물 정체형 (요철, 화이트헤드)');
+      if (data.poreCause.includes('복합')) types.push('복합적임');
+      if (types.length > 0) typeDisplay = types.join(', ');
+    }
 
     poreLines.push(`■ 진단유형: ${typeDisplay}`);
     

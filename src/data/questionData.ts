@@ -682,7 +682,8 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
         id: 'poreCause',
         category: '모공',
         text: '현재 가장 신경 쓰이는 모공의 상태는 어떤가요?',
-        type: 'radio',
+        subtext: '(중복 선택 가능)',
+        type: 'checkbox',
         options: [
           { label: '💧 T존이 번들거리고 모공이 동그랗게 도드라짐 (유분 과다형)', value: '유분과다' },
           { label: '🍐 모공이 타원형이나 물방울 모양으로 아래로 처져 보임 (탄력 저하형)', value: '탄력저하' },
@@ -694,7 +695,7 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
     });
 
     if (formValues?.poreCause) {
-      if (formValues.poreCause === '유분과다') {
+      if (formValues.poreCause.includes('유분과다')) {
         steps.push({
           title: '유분 과다형 상세 분석',
           subtitle: '평소 관리 습관을 파악합니다',
@@ -706,7 +707,9 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
             required: true,
           }]
         });
-      } else if (formValues.poreCause === '탄력저하') {
+      }
+      
+      if (formValues.poreCause.includes('탄력저하')) {
          steps.push({
           title: '탄력 저하형 상세 분석',
           subtitle: '모공 늘어짐이 가장 심한 부위는 어디인가요?',
@@ -725,7 +728,9 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
             required: true,
           }]
         });
-      } else if (formValues.poreCause === '노폐물적체' || formValues.poreCause === '복합') {
+      }
+      
+      if (formValues.poreCause.includes('노폐물적체') || formValues.poreCause.includes('복합')) {
         steps.push({
           title: '노폐물 적체형 상세 분석',
           subtitle: '모공 관리 습관을 확인합니다',
@@ -745,9 +750,9 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
 
       // Check leaf condition to show final common pore step
       const isPoreLeafReached = (
-        (formValues.poreCause === '유분과다' && formValues.poreOilyHabit) ||
-        (formValues.poreCause === '탄력저하' && formValues.poreAgingArea) ||
-        ((formValues.poreCause === '노폐물적체' || formValues.poreCause === '복합') && formValues.poreCloggedHabit)
+        (!formValues.poreCause.includes('유분과다') || formValues.poreOilyHabit) &&
+        (!formValues.poreCause.includes('탄력저하') || formValues.poreAgingArea) &&
+        (!(formValues.poreCause.includes('노폐물적체') || formValues.poreCause.includes('복합')) || formValues.poreCloggedHabit)
       );
 
       if (isPoreLeafReached) {
@@ -789,7 +794,8 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
         id: 'scarCause',
         category: '흉터',
         text: '어떤 원인으로 생긴 흉터인가요?',
-        type: 'radio',
+        subtext: '(중복 선택 가능)',
+        type: 'checkbox',
         options: [
           { label: '여드름 흉터', value: '여드름' },
           { label: '상처 및 외상', value: '상처' },
@@ -808,7 +814,8 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
           id: 'scarDuration',
           category: '흉터',
           text: '해당 흉터가 생긴 지 얼마나 되었나요?',
-          type: 'radio',
+          subtext: '(중복 선택 가능)',
+          type: 'checkbox',
           options: [
             { label: '6개월 미만', value: '6개월 미만' },
             { label: '6개월 ~ 1년', value: '6개월~1년' },
@@ -827,8 +834,8 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
               id: 'scarAcneShape',
               category: '흉터',
               text: '환자분이 느끼시기에 어떤 형태의 흉터가 고민이신가요?',
-              subtext: '아래 가이드를 참고하여 골라주세요.',
-              type: 'radio',
+              subtext: '아래 가이드를 참고하여 골라주세요. (중복 선택 가능)',
+              type: 'checkbox',
               options: [
                 { label: '🧊 송곳 모양(Icepick) - 좁고 깊게 패임', value: 'Icepick' },
                 { label: '📦 박스 모양(Boxcar) - 경계 뚜렷, 넓게 패임', value: 'Boxcar' },
@@ -847,7 +854,8 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
                 id: 'scarAcnePie',
                 category: '흉터',
                 text: '현재 흉터 부위에 붉은 자국이나 색소 침착 등이 동반되나요?',
-                type: 'radio',
+                subtext: '(중복 선택 가능)',
+                type: 'checkbox',
                 options: [
                   { label: '현재 여드름이 계속 나고 있음', value: '여드름 진행중' },
                   { label: '붉은 자국이 심하게 있음', value: '붉은 자국' },
@@ -858,7 +866,8 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
               }]
             });
           }
-        } else if (formValues.scarCause === '상처') {
+        }
+        if (formValues.scarCause.includes('상처')) {
           steps.push({
             title: '상처/외상 흉터 상세진단',
             subtitle: '흉터 생성 원인 파악',
@@ -866,7 +875,8 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
               id: 'scarTraumaOrigin',
               category: '흉터',
               text: '상처가 난 과정을 선택해 주세요.',
-              type: 'radio',
+              subtext: '(중복 선택 가능)',
+              type: 'checkbox',
               options: [
                 { label: '보통의 긁힘/찰과상', value: '찰과상' },
                 { label: '화상으로 인한 상처', value: '화상' },
@@ -885,7 +895,8 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
                 id: 'scarTraumaStatus',
                 category: '흉터',
                 text: '현재 흉터 표면의 양상이 어떤가요?',
-                type: 'radio',
+                subtext: '(중복 선택 가능)',
+                type: 'checkbox',
                 options: [
                   { label: '피부가 패이고 함몰됨', value: '함몰' },
                   { label: '살이 위로 튀어나오고 부풀어오름', value: '돌출' },
@@ -896,7 +907,8 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
               }]
             });
           }
-        } else if (formValues.scarCause === '수술') {
+        }
+        if (formValues.scarCause.includes('수술')) {
           steps.push({
             title: '수술 흉터 상세진단',
             subtitle: '수술의 종류 파악',
@@ -904,7 +916,8 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
               id: 'scarSurgicalType',
               category: '흉터',
               text: '어떤 수술로 인해 생긴 흉터인가요?',
-              type: 'radio',
+              subtext: '(중복 선택 가능)',
+              type: 'checkbox',
               options: [
                 { label: '제왕절개', value: '제왕절개' },
                 { label: '쌍꺼풀 등 소형 미용성형 수술', value: '미용성형' },
@@ -923,7 +936,8 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
                 id: 'scarSurgicalCare',
                 category: '흉터',
                 text: '현재 흉터 연고나 테이프(스테리스트립) 등을 사용 중이신가요?',
-                type: 'radio',
+                subtext: '(중복 선택 가능)',
+                type: 'checkbox',
                 options: [
                   { label: '네, 현재 지속적으로 관리 중입니다', value: '관리 중' },
                   { label: '아니오, 따로 관리하지 않습니다', value: '관리 안함' },
@@ -936,13 +950,12 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
 
         // Only show common POSAS and expectation if they have answered the leaf node
         const isLeafReached = (
-          (formValues.scarCause === '여드름' && formValues.scarAcnePie) ||
-          (formValues.scarCause === '상처' && formValues.scarTraumaStatus) ||
-          (formValues.scarCause === '수술' && formValues.scarSurgicalCare) ||
-          (formValues.scarCause === '기타')
+          (!formValues.scarCause.includes('여드름') || formValues.scarAcnePie) &&
+          (!formValues.scarCause.includes('상처') || formValues.scarTraumaStatus) &&
+          (!formValues.scarCause.includes('수술') || formValues.scarSurgicalCare)
         );
 
-        if (isLeafReached) {
+        if (isLeafReached && formValues.scarCause.length > 0) {
           steps.push({
             title: '임상 평가 척도: 통증 (3/5)',
             subtitle: 'POSAS 기준 통증 (1~5점)',
@@ -950,7 +963,8 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
               id: 'scarPosasPain',
               category: '흉터',
               text: '현재 흉터 부위에 통증이 있나요?',
-              type: 'radio',
+              subtext: '(중복 선택 가능)',
+              type: 'checkbox',
               options: [
                 { label: '1단계 - 전혀 아프지 않음', value: '1' },
                 { label: '2단계 - 아주 약간 아픔', value: '2' },
@@ -970,7 +984,8 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
                 id: 'scarPosasItch',
                 category: '흉터',
                 text: '현재 흉터 부위가 가려우신가요?',
-                type: 'radio',
+                subtext: '(중복 선택 가능)',
+                type: 'checkbox',
                 options: [
                   { label: '1단계 - 전혀 가렵지 않음', value: '1' },
                   { label: '2단계 - 아주 약간 간지러움', value: '2' },
@@ -1001,8 +1016,8 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
                     id: 'scarExpectation',
                     category: '흉터',
                     text: '어느 정도의 개선 효과를 원하시나요?',
-                    subtext: '흉터의 종류에 따라 완벽한 제거가 불가능할 수도 있습니다.',
-                    type: 'radio',
+                    subtext: '흉터의 종류에 따라 완벽한 제거가 불가능할 수도 있습니다. (중복 선택 가능)',
+                    type: 'checkbox',
                     options: [
                       { label: '지금 내 상태에서 조금만 눈에 덜 띄어도 좋음', value: '조금 완화' },
                       { label: '적어도 50% 이상 뚜렷한 개선 희망', value: '50% 이상' },
