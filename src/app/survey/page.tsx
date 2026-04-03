@@ -89,8 +89,6 @@ function SurveyContent() {
       painSensitivity: '',
       skinConcerns: '',
       additionalNotes: '',
-      photoGuide1: '',
-      photoGuide2: '',
     },
   });
 
@@ -141,8 +139,6 @@ function SurveyContent() {
             skinType: parsed.skinType,
             painSensitivity: parsed.painSensitivity,
             skinConcerns: parsed.skinConcerns,
-            photoGuide1: parsed.photoGuide1,
-            photoGuide2: parsed.photoGuide2,
           });
         } catch (e) {
           console.error("Failed to parse previous surveyData", e);

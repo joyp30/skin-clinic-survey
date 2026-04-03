@@ -336,15 +336,6 @@ export const commonLaserLiftingQuestions: Question[] = [
   },
 ];
 
-export const photoGuideQuestions: Question[] = [
-  {
-    id: 'photoGuide1',
-    category: '촬영 안내',
-    text: '현재 화장기 없는 생얼 상태인가요?',
-    type: 'yesno',
-    required: true,
-  }
-];
 
 export const pigmentQuestions: Question[] = [
   {
@@ -1075,9 +1066,9 @@ export function getStepsForProcedure(procedure: string, skipCommon: boolean = fa
 
   if (!skipCommon) {
     steps.push({
-      title: '피부 상태 확인 및 사진 가이드',
-      subtitle: '정확한 진단을 위한 피부 정보와 촬영 전 체크리스트입니다',
-      questions: [...skinStatusQuestions, ...photoGuideQuestions],
+      title: '피부 상태 확인',
+      subtitle: '정확한 진단을 위한 피부 정보 확인입니다',
+      questions: skinStatusQuestions,
     });
   }
 

@@ -6,7 +6,6 @@ import {
   pigmentQuestions,
   liftingQuestions,
   acneQuestions,
-  photoGuideQuestions,
 } from '@/data/questionData';
 
 const procedureNames: Record<string, string> = {
@@ -299,14 +298,6 @@ export function generateCrmText(data: SurveyFormData): string {
     lines.push(`[피부상태] ${skinParts.join(', ')}`);
   }
   
-  // Photo guide check
-  const guideFlags: string[] = [];
-  if (data.photoGuide1 === 'no') guideFlags.push('조명 부적합');
-  if (data.photoGuide2 === 'no') guideFlags.push('필터 사용 또는 화장 상태');
-  
-  if (guideFlags.length > 0) {
-    lines.push(`⚠️ 사진 재촬영 필요 가능성 높음: ${guideFlags.join(', ')}`);
-  }
 
   // --- [BDDQ] Score ---
   const bddqScore =
