@@ -276,6 +276,8 @@ export function generateCrmText(data: SurveyFormData): string {
     if (data.pigmentType) pigmentParts.push(`타입: ${data.pigmentType.replace(/기타(, )?/g, '')}`);
     if (data.pigmentStart) pigmentParts.push(`발생 시기: ${data.pigmentStart}`);
     if (data.pigmentUv) pigmentParts.push(`습관: ${data.pigmentUv}`);
+    if (data.pigmentSunscreenCount) pigmentParts.push(`선크림 덧바름: ${data.pigmentSunscreenCount}`);
+    if (data.pigmentMakeup) pigmentParts.push(`평소 화장: ${data.pigmentMakeup}`);
 
     if (pigmentParts.length > 0) {
       lines.push('\n[색소 분석]');

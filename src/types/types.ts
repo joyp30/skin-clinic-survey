@@ -109,6 +109,8 @@ export interface SurveyFormData {
   // Pigment specific
   pigmentStart: string;
   pigmentUv: string;
+  pigmentSunscreenCount: string;
+  pigmentMakeup: string;
   pigmentType: string;
 
   // Laser/Lifting specific

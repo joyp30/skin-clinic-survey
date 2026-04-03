@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Clock, Search, ChevronRight, FileText } from 'lucide-react';
+import { Shield, Clock, Search, ChevronRight, FileText, Trash2, Home } from 'lucide-react';
 import { SurveyFormData } from '@/types/types';
 import { generateCrmText, copyToClipboard } from '@/utils/crmFormatter';
 import { procedures } from '@/data/questionData';
@@ -153,6 +153,41 @@ export default function AdminDashboard() {
     setSelectedGroup(group);
     setActiveSurveyIndex(0);
     setCopied(false);
+  };
+
+  const handleDeleteGroup = async (e: React.MouseEvent, group: SurveyGroup) => {
+    e.stopPropagation();
+    if (!confirm(`${group.patientName}님의 문진 기록을 모두 삭제하시겠습니까?`)) return;
+
+    const createdAts = group.surveys.map(s => s.createdAt).filter(Boolean);
+
+    try {
+      const res = await fetch('/api/surveys', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ createdAts }),
+      });
+
+      if (res.ok) {
+        setHistory(prev => prev.filter(s => !createdAts.includes(s.createdAt)));
+        
+        const stored = localStorage.getItem('surveyHistory');
+        if (stored) {
+          const parsed = JSON.parse(stored) as SurveyFormData[];
+          const filtered = parsed.filter(s => !createdAts.includes(s.createdAt || ''));
+          localStorage.setItem('surveyHistory', JSON.stringify(filtered));
+        }
+
+        if (selectedGroup?.key === group.key) {
+          setSelectedGroup(null);
+        }
+      } else {
+        alert('삭제에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('삭제 중 오류가 발생했습니다.');
+    }
   };
 
   const handleAuth = (e: React.FormEvent) => {
@@ -313,14 +348,37 @@ export default function AdminDashboard() {
                     )}
                     {hasWarning && <span className="warning-dot" title="BDDQ 주의" />}
                   </div>
-                  <div className="item-meta">
-                    <Clock size={12} />
-                    <span>
-                      {group.latestAt
-                        ? format(parseISO(group.latestAt), 'M월 d일 (EEE) a h:mm', { locale: ko })
-                        : '시간 정보 없음'}
-                    </span>
-                    <ChevronRight size={16} className="arrow" />
+                  <div className="item-meta" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Clock size={12} />
+                      <span>
+                        {group.latestAt
+                          ? format(parseISO(group.latestAt), 'M월 d일 (EEE) a h:mm', { locale: ko })
+                          : '시간 정보 없음'}
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <button
+                        onClick={(e) => handleDeleteGroup(e, group)}
+                        style={{
+                          background: 'rgba(239, 68, 68, 0.15)',
+                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          color: '#fca5a5',
+                          borderRadius: '6px',
+                          padding: '6px 12px',
+                          fontSize: '0.8rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                        title="이 환자의 기록 삭제"
+                      >
+                        <Trash2 size={14} /> 삭제
+                      </button>
+                      <ChevronRight size={16} className="arrow" />
+                    </div>
                   </div>
                 </motion.div>
               );
@@ -338,19 +396,57 @@ export default function AdminDashboard() {
               exit={{ opacity: 0, scale: 0.95, x: 20 }}
               transition={{ type: 'spring', stiffness: 300, damping: 25 }}
             >
-              <div className="detail-header">
-                <button
-                  className="back-btn"
-                  onClick={() => setSelectedGroup(null)}
-                >
-                  ← 목록이나 검색 화면으로
-                </button>
-                <h2>{selectedGroup.patientName}님 문진 상세</h2>
-                <span className="time-badge">
-                  {selectedGroup.latestAt
-                    ? format(parseISO(selectedGroup.latestAt), 'yyyy년 MM월 dd일', { locale: ko })
-                    : ''}
-                </span>
+              <div className="detail-header" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', gap: '12px', width: '100%' }}>
+                  <button
+                    onClick={() => setSelectedGroup(null)}
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      padding: '12px',
+                      fontSize: '0.95rem',
+                      fontWeight: 600,
+                      background: 'rgba(255, 255, 255, 0.1)',
+                      color: 'var(--text-primary)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Home size={18} /> 목록 (뒤로가기)
+                  </button>
+                  <button
+                    onClick={(e) => handleDeleteGroup(e, selectedGroup)}
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      padding: '12px',
+                      fontSize: '0.95rem',
+                      fontWeight: 600,
+                      background: 'rgba(239, 68, 68, 0.15)',
+                      color: '#fca5a5',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      borderRadius: '8px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Trash2 size={18} /> 기록 삭제
+                  </button>
+                </div>
+                <div>
+                  <h2 style={{ fontSize: '1.4rem', margin: '0 0 8px 0' }}>{selectedGroup.patientName}님 문진 상세</h2>
+                  <span className="time-badge">
+                    {selectedGroup.latestAt
+                      ? format(parseISO(selectedGroup.latestAt), 'yyyy년 MM월 dd일', { locale: ko })
+                      : ''}
+                  </span>
+                </div>
               </div>
 
               {/* Tabs for multiple surveys in same group */}
