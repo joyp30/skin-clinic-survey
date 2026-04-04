@@ -173,11 +173,41 @@ body {
   background-clip: text;
 }
 
-.hero-subtitle {
-  margin-top: 16px;
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
+/* Hero Notice Card */
+.hero-notice {
+  margin-top: 20px;
+  padding: 18px 22px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(236, 72, 153, 0.10), rgba(139, 92, 246, 0.12));
+  border: 1.5px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(251, 191, 36, 0.15), 0 0 0 1.5px rgba(251, 191, 36, 0.35);
+  animation: noticeGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes noticeGlow {
+  from { box-shadow: 0 4px 20px rgba(251, 191, 36, 0.15), 0 0 0 1.5px rgba(251, 191, 36, 0.3); }
+  to   { box-shadow: 0 6px 30px rgba(236, 72, 153, 0.2), 0 0 0 1.5px rgba(236, 72, 153, 0.5); }
+}
+
+.hero-notice-main {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.65;
+  background: linear-gradient(90deg, #fbbf24, #f472b6, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+
+.hero-notice-sub {
+  font-size: 0.82rem;
+  color: #d1d5db;
+  line-height: 1.7;
+  font-weight: 400;
 }
 
 /* Trust Badges */

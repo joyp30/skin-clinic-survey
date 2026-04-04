@@ -112,6 +112,9 @@ export interface SurveyFormData {
   pigmentSunscreenCount: string;
   pigmentMakeup: string;
   pigmentType: string;
+  pigmentHormone: string;
+  pigmentPregnancy: string;
+  pigmentMenopause: string;
 
   // Laser/Lifting specific
   liftingArea: string;

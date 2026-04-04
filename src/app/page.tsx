@@ -46,11 +46,16 @@ export default function Home() {
             <br />
             <span className="hero-title-accent">피부과 사전문진</span>
           </h1>
-          <p className="hero-subtitle">
-            안전하고 효과적인 시술을 위해
-            <br />
-            사전 문진에 답변해 주세요
-          </p>
+          <div className="hero-notice">
+            <p className="hero-notice-main">
+              💛 안전하고 효과적인 시술을 위해<br />
+              사전 문진을 꼭 최대한 작성 부탁드려요~
+            </p>
+            <p className="hero-notice-sub">
+              작성해 주신 내용은 더 좋은 상담과 시술을 위해서만 사용됩니다 🩺<br />
+              솔직하고 꼼꼼하게 답변해 주실수록 원장님이 더욱 꼭 맞는 도움을 드릴 수 있어요 😊
+            </p>
+          </div>
         </motion.div>
       </div>
 

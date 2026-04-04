@@ -277,6 +277,9 @@ export function generateCrmText(data: SurveyFormData): string {
     if (data.pigmentUv) pigmentParts.push(`습관: ${data.pigmentUv}`);
     if (data.pigmentSunscreenCount) pigmentParts.push(`선크림 덧바름: ${data.pigmentSunscreenCount}`);
     if (data.pigmentMakeup) pigmentParts.push(`평소 화장: ${data.pigmentMakeup}`);
+    if (data.pigmentHormone === 'yes') pigmentParts.push('여성호르몬제 복용 중 ⚠️');
+    if (data.pigmentPregnancy === 'yes') pigmentParts.push('임신/출산 관련 기미 이력');
+    if (data.pigmentMenopause === 'yes') pigmentParts.push('완경 후 색소 변화');
 
     if (pigmentParts.length > 0) {
       lines.push('\n[색소 분석]');

@@ -409,6 +409,36 @@ export const pigmentQuestions: Question[] = [
     ],
     required: true,
   },
+  {
+    id: 'pigmentHormone',
+    category: '색소',
+    text: '[여성 전용] 현재 또는 최근 6개월 내에 여성호르몬제(피임약, 호르몬 대체요법 등)를 복용하고 계신가요?',
+    subtext: '여성호르몬은 기미 및 색소침착을 악화시키는 주요 원인 중 하나입니다. 남성 고객님은 "아니오"를 선택해 주세요.',
+    type: 'yesno',
+    warningOn: 'yes',
+    warningMessage: '여성호르몬제 복용 중 (색소 악화 위험)',
+    required: true,
+  },
+  {
+    id: 'pigmentPregnancy',
+    category: '색소',
+    text: '[여성 전용] 임신 또는 출산 경험이 있으신가요? (기미가 임신 중 또는 출산 후 생기거나 악화된 경우 포함)',
+    subtext: '임신/출산 시 호르몬 변화로 기미가 생기거나 짙어질 수 있습니다. 남성 고객님은 "아니오"를 선택해 주세요.',
+    type: 'yesno',
+    warningOn: 'yes',
+    warningMessage: '임신/출산 관련 기미 이력',
+    required: true,
+  },
+  {
+    id: 'pigmentMenopause',
+    category: '색소',
+    text: '[여성 전용] 완경(폐경) 이후 색소 변화(기미 악화 등)를 느끼신 적이 있나요?',
+    subtext: '완경 후 호르몬 변화는 색소 분포에 영향을 줄 수 있습니다. 남성 또는 완경 전인 고객님은 "아니오"를 선택해 주세요.',
+    type: 'yesno',
+    warningOn: 'yes',
+    warningMessage: '완경 후 색소 변화 이력',
+    required: true,
+  },
   ...commonLaserLiftingQuestions
 ];
 
