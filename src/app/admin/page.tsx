@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Clock, Search, ChevronRight, FileText, Trash2, Home } from 'lucide-react';
+import { Shield, Clock, Search, ChevronRight, FileText, Trash2, Home, RefreshCw } from 'lucide-react';
 import { SurveyFormData } from '@/types/types';
 import { generateCrmText, copyToClipboard } from '@/utils/crmFormatter';
 import { procedures } from '@/data/questionData';
@@ -59,6 +59,7 @@ export default function AdminDashboard() {
   const [selectedGroup, setSelectedGroup] = useState<SurveyGroup | null>(null);
   const [activeSurveyIndex, setActiveSurveyIndex] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Auth state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -66,52 +67,55 @@ export default function AdminDashboard() {
   const [authError, setAuthError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchSurveys = async () => {
+  const loadLocalHistory = () => {
+    const storedHistory = localStorage.getItem('surveyHistory');
+    if (storedHistory) {
       try {
-        const res = await fetch('/api/surveys', { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-
-          if (Array.isArray(data)) {
-            const sorted = data.sort((a: SurveyFormData, b: SurveyFormData) => {
-              const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-              const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-              return dateB - dateA;
-            });
-            setHistory(sorted);
-          } else {
-            loadLocalHistory();
-          }
-        } else {
-          loadLocalHistory();
-        }
+        const parsed = JSON.parse(storedHistory) as SurveyFormData[];
+        const sorted = parsed.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
+        setHistory(sorted);
       } catch (e) {
-        console.error('Failed to fetch from DB', e);
-        loadLocalHistory();
-      } finally {
-        setIsLoading(false);
+        console.error('Failed to parse history', e);
       }
-    };
+    }
+  };
 
-    const loadLocalHistory = () => {
-      const storedHistory = localStorage.getItem('surveyHistory');
-      if (storedHistory) {
-        try {
-          const parsed = JSON.parse(storedHistory) as SurveyFormData[];
-          const sorted = parsed.sort((a, b) => {
+  const fetchSurveys = async (showRefresh = false) => {
+    if (showRefresh) setIsRefreshing(true);
+    else setIsLoading(true);
+    try {
+      const res = await fetch('/api/surveys', { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          const sorted = data.sort((a: SurveyFormData, b: SurveyFormData) => {
             const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
             const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
             return dateB - dateA;
           });
           setHistory(sorted);
-        } catch (e) {
-          console.error('Failed to parse history', e);
+        } else {
+          loadLocalHistory();
         }
+      } else {
+        loadLocalHistory();
       }
-    };
+    } catch (e) {
+      console.error('Failed to fetch from DB', e);
+      loadLocalHistory();
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
 
+  useEffect(() => {
     fetchSurveys();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCopy = async (data: SurveyFormData) => {
@@ -253,14 +257,44 @@ export default function AdminDashboard() {
           <Shield className="admin-icon" size={24} />
           <h1>직원용 문진 현황 대시보드</h1>
         </motion.div>
-        <motion.p
-          className="admin-subtitle"
+        <motion.div
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '4px' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          총 {history.length}건의 문진이 제출되었습니다.
-        </motion.p>
+          <p className="admin-subtitle" style={{ margin: 0 }}>
+            총 {history.length}건의 문진이 제출되었습니다.
+          </p>
+          <button
+            onClick={() => fetchSurveys(true)}
+            disabled={isRefreshing}
+            title="목록 새로고침"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              background: 'rgba(139, 92, 246, 0.15)',
+              color: 'var(--accent-secondary)',
+              border: '1px solid rgba(139, 92, 246, 0.3)',
+              borderRadius: '20px',
+              cursor: isRefreshing ? 'not-allowed' : 'pointer',
+              opacity: isRefreshing ? 0.6 : 1,
+              transition: 'all 0.2s',
+            }}
+          >
+            <RefreshCw
+              size={14}
+              style={{
+                animation: isRefreshing ? 'spin 0.8s linear infinite' : 'none',
+              }}
+            />
+            {isRefreshing ? '업데이트 중...' : '새로고침'}
+          </button>
+        </motion.div>
       </div>
 
       <motion.div
