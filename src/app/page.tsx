@@ -35,14 +35,14 @@ export default function Home() {
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className="hero-logo-container">
-            <img src="/seoul_logo.png" alt="서울피부과의원 로고" className="hero-logo" />
+            <img src="/seoul_logo.png" alt="서울엔피부과의원 로고" className="hero-logo" />
           </div>
           <div className="hero-badge">
             <Stethoscope size={16} />
             스마트 문진 시스템
           </div>
           <h1 className="hero-title">
-            서울피부과의원
+            서울엔피부과의원
             <br />
             <span className="hero-title-accent">피부과 사전문진</span>
           </h1>

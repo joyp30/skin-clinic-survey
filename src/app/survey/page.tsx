@@ -48,6 +48,8 @@ function SurveyContent() {
       fillerInflammation: '',
       fillerArea: '',
       liftingSleepHabit: '',
+      liftingConcernArea: '',
+      collagenBoosterArea: '',
       acneIsotretinoin: '',
       acneType: '',
       acneLifestyle: '',

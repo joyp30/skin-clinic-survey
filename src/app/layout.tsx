@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "피부과 사전문진 | Pre-Consultation Survey",
-  description: "안전하고 효과적인 시술을 위한 피부과 비보험 시술 사전문진 시스템",
+  title: "서울엔피부과의원 사전문진 | Pre-Consultation Survey",
+  description: "서울엔피부과의원 안전하고 효과적인 시술을 위한 비보험 시술 사전문진 시스템",
   viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
 };
 

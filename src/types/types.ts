@@ -73,6 +73,8 @@ export interface SurveyFormData {
 
   // Lifting specific
   liftingSleepHabit: string;
+  liftingConcernArea: string;
+  collagenBoosterArea: string;
 
   // Acne specific
   acneIsotretinoin: string;

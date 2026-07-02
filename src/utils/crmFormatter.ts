@@ -72,7 +72,9 @@ export function generateCrmText(data: SurveyFormData): string {
   const areaParts: string[] = [];
   if (data.botoxArea) areaParts.push(`보톡스: ${data.botoxArea}`);
   if (data.fillerArea) areaParts.push(`필러: ${data.fillerArea}`);
-  if (data.liftingArea) areaParts.push(`리프팅 및 콜라겐부스터: ${data.liftingArea}`);
+  if (data.liftingConcernArea) areaParts.push(`고민 부위: ${data.liftingConcernArea}`);
+  if (data.liftingArea) areaParts.push(`리프팅 시술 희망: ${data.liftingArea}`);
+  if (data.collagenBoosterArea) areaParts.push(`콜라겐부스터 희망: ${data.collagenBoosterArea}`);
   
   if (areaParts.length > 0) {
     procedureDetail += ` (${areaParts.join(' / ')})`;
