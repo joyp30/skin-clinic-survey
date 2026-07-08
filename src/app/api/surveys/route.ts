@@ -1,5 +1,6 @@
 import { kv } from '@vercel/kv';
 import { NextResponse } from 'next/server';
+import { SurveyFormData } from '@/types/types';
 
 export async function GET() {
   try {
@@ -31,7 +32,7 @@ export async function DELETE(request: Request) {
        return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
     }
 
-    const surveys: any[] = (await kv.lrange('surveys', 0, -1)) || [];
+    const surveys: SurveyFormData[] = (await kv.lrange('surveys', 0, -1)) || [];
     const newSurveys = surveys.filter(s => !createdAts.includes(s.createdAt));
 
     await kv.del('surveys');

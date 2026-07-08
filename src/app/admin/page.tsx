@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { format, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -53,7 +52,6 @@ function groupSurveys(history: SurveyFormData[]): SurveyGroup[] {
 }
 
 export default function AdminDashboard() {
-  const router = useRouter();
   const [history, setHistory] = useState<SurveyFormData[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<SurveyGroup | null>(null);

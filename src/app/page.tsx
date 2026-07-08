@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Stethoscope, Shield, Clock, ArrowRight } from 'lucide-react';
 import { procedures } from '@/data/questionData';
-import { ProcedureType } from '@/types/types';
 
 export default function Home() {
   const router = useRouter();

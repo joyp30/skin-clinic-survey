@@ -3,16 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Copy,
   CheckCircle,
   AlertTriangle,
-  ArrowLeft,
-  ClipboardCheck,
   Sparkles,
 } from 'lucide-react';
 import { SurveyFormData, ProcedureType } from '@/types/types';
-import { generateCrmText, copyToClipboard } from '@/utils/crmFormatter';
-import { procedures } from '@/data/questionData';
+import { assessCollagenReadiness, isCirsApplicableProcedure } from '@/utils/cirs';
 
 const procedureLabels: Record<ProcedureType, string> = {
   botox: '보톡스',
@@ -26,28 +22,17 @@ const procedureLabels: Record<ProcedureType, string> = {
 
 export default function ResultPage() {
   const router = useRouter();
-  const [data, setData] = useState<SurveyFormData | null>(null);
-  const [crmText, setCrmText] = useState('');
-  const [copied, setCopied] = useState(false);
+  const [data] = useState<SurveyFormData | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const stored = sessionStorage.getItem('surveyData');
+    return stored ? (JSON.parse(stored) as SurveyFormData) : null;
+  });
 
   useEffect(() => {
-    const stored = sessionStorage.getItem('surveyData');
-    if (stored) {
-      const parsed = JSON.parse(stored) as SurveyFormData;
-      setData(parsed);
-      setCrmText(generateCrmText(parsed));
-    } else {
+    if (!data) {
       router.push('/');
     }
-  }, [router]);
-
-  const handleCopy = async () => {
-    const success = await copyToClipboard(crmText);
-    if (success) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 3000);
-    }
-  };
+  }, [data, router]);
 
   const handleReset = () => {
     sessionStorage.removeItem('surveyData');
@@ -65,25 +50,16 @@ export default function ResultPage() {
     );
   }
 
-  const proc = procedures.find((p) => p.id === data.procedure);
-  const bddqScore =
-    (parseInt(data.bddq1 || '0') || 0) +
-    (parseInt(data.bddq2 || '0') || 0) +
-    (parseInt(data.bddq3 || '0') || 0) +
-    (parseInt(data.bddq4 || '0') || 0);
-
-  // Collect all warnings
-  const warnings: string[] = [];
-  if (data.pregnancy === 'yes') warnings.push('임신/수유 중');
-  if (data.medications === 'yes') warnings.push('약물 복용 중');
-  if (data.allergyLidocaine === 'yes') warnings.push('리도카인 알레르기');
-  if (data.allergyMetal === 'yes') warnings.push('금속 알레르기');
-  if (data.botoxResistance === 'yes') warnings.push('보톡스 내성 의심');
-  if (data.fillerNodule === 'yes') warnings.push('필러 결절 경험');
-  if (data.fillerInflammation === 'yes') warnings.push('필러 염증 경험');
-  if (data.metalImplant === 'yes') warnings.push('체내 금속 임플란트');
-  if (data.keloid === 'yes') warnings.push('켈로이드 체질');
-  if (data.recentSunExposure === 'yes') warnings.push('최근 자외선 노출');
+  const readinessApplies = isCirsApplicableProcedure(data.procedure);
+  const readiness = readinessApplies ? assessCollagenReadiness(data) : null;
+  const canAddProcedures = !readiness || (readiness.grade === 'Green' && !readiness.shouldBlockAddOns);
+  const readinessScore = !readiness
+    ? ''
+    : !readiness.isComplete
+    ? 'CIRS 미작성'
+    : readiness.redFlags.length > 0
+    ? `CIRS ${readiness.totalScore}점 + 보류 기준`
+    : `CIRS ${readiness.totalScore}점`;
 
   return (
     <main className="result-page" style={{ 
@@ -104,46 +80,52 @@ export default function ResultPage() {
         </p>
       </div>
 
-      {/* Add-on procedures */}
-      {data && (
-        <div style={{ 
-          marginTop: '32px', 
-          padding: '24px', 
-          background: 'var(--bg-card)', 
-          border: '1px solid var(--border-subtle)', 
-          borderRadius: '20px',
-          textAlign: 'center'
-        }}>
-          <h3 style={{ fontWeight: 700, fontSize: '1rem', marginBottom: '8px', color: 'var(--text-primary)' }}>
-            ➕ 다른 시술도 알아보고 싶으신가요?
-          </h3>
-          <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-            공통 건강 정보 질문은 생략하고 내용 문진으로 바로 넘어갑니다.
-          </p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
+      {readiness && (
+        <section className={`readiness-panel ${readiness.grade.toLowerCase()}`}>
+          <div className="readiness-heading">
+            <AlertTriangle size={20} />
+            <div>
+              <p className="readiness-kicker">{readinessScore}</p>
+              <h2>{readiness.label}</h2>
+            </div>
+          </div>
+          <p className="readiness-message">{readiness.patientMessage}</p>
+          <p className="readiness-strategy">{readiness.strategy}</p>
+          {readiness.reasons.length > 0 && (
+            <div className="readiness-reasons">
+              {readiness.reasons.slice(0, 6).map((reason) => (
+                <span key={reason}>{reason}</span>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {canAddProcedures ? (
+        <section className="add-on-panel">
+          <h3>다른 시술도 같이 문진하시겠어요?</h3>
+          <p>공통 건강 정보는 유지하고 선택한 시술 문진으로 이어집니다.</p>
+          <div className="add-on-buttons">
             {(['botox', 'filler', 'pigment', 'lifting', 'acne'] as ProcedureType[])
               .filter((p) => !data.procedure.includes(p))
               .map((p) => (
                 <button
                   key={p}
                   onClick={() => router.push(`/survey?procedure=${p}&skipCommon=true`)}
-                  style={{
-                    padding: '10px 20px',
-                    background: 'linear-gradient(135deg, #eef2ff, #e0e7ff)',
-                    color: '#4338ca',
-                    borderRadius: '100px',
-                    fontWeight: 600,
-                    fontSize: '0.9rem',
-                    border: 'none',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s',
-                  }}
                 >
                   {procedureLabels[p]} 추가하기
                 </button>
             ))}
           </div>
-        </div>
+        </section>
+      ) : (
+        <section className="stabilization-panel">
+          <h3>오늘은 추가 시술보다 피부 안정화가 우선입니다.</h3>
+          <p>
+            현재 판정에서는 다른 시술을 이어서 선택하기보다 진정, 보습, 광보호,
+            염증 조절 후 재평가하는 흐름이 안전합니다.
+          </p>
+        </section>
       )}
 
       {/* Actions */}

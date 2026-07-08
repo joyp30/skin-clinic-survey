@@ -1,4 +1,4 @@
-import { SurveyFormData, ProcedureType } from '@/types/types';
+import { Question, SurveyFormData } from '@/types/types';
 import {
   commonQuestions,
   botoxQuestions,
@@ -7,6 +7,7 @@ import {
   liftingQuestions,
   acneQuestions,
 } from '@/data/questionData';
+import { assessCollagenReadiness, isCirsApplicableProcedure } from '@/utils/cirs';
 
 const procedureNames: Record<string, string> = {
   botox: '보톡스',
@@ -20,9 +21,22 @@ const procedureNames: Record<string, string> = {
 
 export function generateCrmText(data: SurveyFormData): string {
   const lines: string[] = [];
+  const readiness = isCirsApplicableProcedure(data.procedure)
+    ? assessCollagenReadiness(data)
+    : null;
 
   // --- [주의] Warnings ---
   const warnings: string[] = [];
+
+  if (readiness && !readiness.isComplete) {
+    warnings.push(`CIRS 미작성: 피부 회복력 확인 후 시술 강도 결정`);
+  } else if (readiness?.grade === 'Red') {
+    warnings.push(`CIRS Red: 안정화 우선 - 강한 자극 시술 보류`);
+  } else if (readiness?.grade === 'Yellow') {
+    warnings.push(`CIRS Yellow: pre-conditioning 후 저강도/긴 간격 권장`);
+  } else if (readiness?.shouldBlockAddOns) {
+    warnings.push(`민감 신호: 추가 시술보다 피부 상태 재확인 권장`);
+  }
 
   // Common warnings
   commonQuestions.forEach((q) => {
@@ -33,7 +47,7 @@ export function generateCrmText(data: SurveyFormData): string {
 
   // Procedure-specific warnings
   const procedureArray = data.procedure ? data.procedure.split(',').map(p => p.trim()) : [];
-  const procQuestions: any[] = [];
+  const procQuestions: Question[] = [];
   procedureArray.forEach(p => {
     if (p === 'botox') procQuestions.push(...botoxQuestions);
     else if (p === 'filler') procQuestions.push(...fillerQuestions);
@@ -81,6 +95,19 @@ export function generateCrmText(data: SurveyFormData): string {
   }
 
   lines.push(`[시술] ${procedureDetail} 희망`);
+
+  if (readiness) {
+    const scorePrefix = !readiness.isComplete
+      ? 'CIRS 미작성'
+      : readiness.redFlags.length > 0
+      ? `CIRS ${readiness.totalScore}점 + 보류 기준`
+      : `CIRS ${readiness.totalScore}점`;
+    lines.push(`[피부회복력] ${scorePrefix}, ${readiness.label}`);
+    lines.push(`[시술순서] ${readiness.strategy}`);
+    if (readiness.reasons.length > 0) {
+      lines.push(`[판정근거] ${readiness.reasons.slice(0, 8).join(', ')}`);
+    }
+  }
 
   // --- [기왕력] Medical history ---
   const history: string[] = [];
@@ -176,7 +203,7 @@ export function generateCrmText(data: SurveyFormData): string {
     scarLines.push(`■ 원인: ${data.scarCause || '미기재'}`);
     scarLines.push(`■ 시기: ${data.scarDuration || '미기재'} / 켈로이드: ${data.scarKeloid || '미기재'}`);
     
-    let patternParts = [];
+    const patternParts = [];
     if (data.scarCause && data.scarCause.includes('여드름')) {
       const parts = [];
       if (data.scarAcneShape) parts.push(`형태(${data.scarAcneShape})`);
@@ -191,7 +218,7 @@ export function generateCrmText(data: SurveyFormData): string {
       patternParts.push(`[수술] 수술기원(${data.scarSurgicalType || '미기재'}) / 처치상태(${data.scarSurgicalCare || '미기재'})`);
     }
     
-    let pattern = patternParts.length > 0 ? patternParts.join(' | ') : '미기재';
+    const pattern = patternParts.length > 0 ? patternParts.join(' | ') : '미기재';
     
     scarLines.push(`■ 양상: ${pattern}`);
     

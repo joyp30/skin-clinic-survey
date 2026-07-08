@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Question } from '@/types/types';
-import { AnimatePresence, motion } from 'framer-motion';
 
 interface QuestionCardProps {
   question: Question;
@@ -15,21 +14,18 @@ export default function QuestionCard({
   onChange,
   animationDelay = 0,
 }: QuestionCardProps) {
-  // State for custom '기타' text input
-  const [customText, setCustomText] = useState('');
-
-  // Extract initial custom text if it exists in the value strings
-  useEffect(() => {
-    if (!value) return;
+  const [customText, setCustomText] = useState(() => {
+    if (!value) return '';
     const values = value.split(', ');
     const otherVal = values.find(v => v.startsWith('기타('));
     if (otherVal) {
       const match = otherVal.match(/기타\((.*)\)/);
       if (match && match[1]) {
-        setCustomText(match[1]);
+        return match[1];
       }
     }
-  }, []);
+    return '';
+  });
 
   const handleCustomTextChange = (newText: string, isCheckbox: boolean) => {
     setCustomText(newText);

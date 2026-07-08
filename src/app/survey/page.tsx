@@ -17,7 +17,6 @@ function SurveyContent() {
   const skipCommon = searchParams.get('skipCommon') === 'true';
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [unansweredIds, setUnansweredIds] = useState<string[]>([]);
 
   const { setValue, getValues, watch, reset } = useForm<SurveyFormData>({
@@ -90,6 +89,14 @@ function SurveyContent() {
       skinType: '',
       painSensitivity: '',
       skinConcerns: '',
+      cirsContraindications: '',
+      cirsErythemaHeat: '',
+      cirsStingingItching: '',
+      cirsDrynessFlaking: '',
+      cirsPihTendency: '',
+      cirsRecoveryDelay: '',
+      cirsInflammatoryLesions: '',
+      cirsSystemicBurden: '',
       additionalNotes: '',
     },
   });
@@ -111,10 +118,8 @@ function SurveyContent() {
   );
 
   const transitionTo = useCallback((step: number) => {
-    setIsTransitioning(true);
     setTimeout(() => {
       setCurrentStep(step);
-      setIsTransitioning(false);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }, 250);
   }, []);
@@ -141,9 +146,17 @@ function SurveyContent() {
             skinType: parsed.skinType,
             painSensitivity: parsed.painSensitivity,
             skinConcerns: parsed.skinConcerns,
+            cirsContraindications: parsed.cirsContraindications,
+            cirsErythemaHeat: parsed.cirsErythemaHeat,
+            cirsStingingItching: parsed.cirsStingingItching,
+            cirsDrynessFlaking: parsed.cirsDrynessFlaking,
+            cirsPihTendency: parsed.cirsPihTendency,
+            cirsRecoveryDelay: parsed.cirsRecoveryDelay,
+            cirsInflammatoryLesions: parsed.cirsInflammatoryLesions,
+            cirsSystemicBurden: parsed.cirsSystemicBurden,
           });
-        } catch (e) {
-          console.error("Failed to parse previous surveyData", e);
+        } catch {
+          console.error("Failed to parse previous surveyData");
         }
       }
     }
@@ -197,7 +210,7 @@ function SurveyContent() {
         const existingHistory = JSON.parse(localStorage.getItem('surveyHistory') || '[]');
         existingHistory.push(data);
         localStorage.setItem('surveyHistory', JSON.stringify(existingHistory));
-      } catch (e) { }
+      } catch { }
 
       // Save to Vercel KV DB
       fetch('/api/surveys', {
@@ -285,7 +298,7 @@ function SurveyContent() {
             initial="hidden"
             animate="show"
           >
-            {currentQuestions.map((question, index) => {
+            {currentQuestions.map((question) => {
               if (question.id === 'medicationDetail' && formValues.medications !== 'yes') return null;
               if (question.id === 'allergyDetail' && formValues.allergyOther !== 'yes') return null;
               if (question.id === 'metalImplantDetail' && formValues.metalImplant !== 'yes') return null;
