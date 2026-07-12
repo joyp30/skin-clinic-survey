@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import {
   CheckCircle,
   AlertTriangle,
+  HeartPulse,
   Sparkles,
 } from 'lucide-react';
 import { SurveyFormData, ProcedureType } from '@/types/types';
 import { assessCollagenReadiness, isCirsApplicableProcedure } from '@/utils/cirs';
+import { assessPainSensitivity } from '@/utils/painSensitivity';
 
 const procedureLabels: Record<ProcedureType, string> = {
   botox: '보톡스',
@@ -22,24 +24,29 @@ const procedureLabels: Record<ProcedureType, string> = {
 
 export default function ResultPage() {
   const router = useRouter();
-  const [data] = useState<SurveyFormData | null>(() => {
-    if (typeof window === 'undefined') return null;
-    const stored = sessionStorage.getItem('surveyData');
-    return stored ? (JSON.parse(stored) as SurveyFormData) : null;
-  });
+  const [data, setData] = useState<SurveyFormData | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    if (!data) {
-      router.push('/');
-    }
-  }, [data, router]);
+    const loadSurvey = window.setTimeout(() => {
+      const stored = sessionStorage.getItem('surveyData');
+      if (stored) {
+        setData(JSON.parse(stored) as SurveyFormData);
+      } else {
+        router.push('/');
+      }
+      setIsLoaded(true);
+    }, 0);
+
+    return () => window.clearTimeout(loadSurvey);
+  }, [router]);
 
   const handleReset = () => {
     sessionStorage.removeItem('surveyData');
     router.push('/');
   };
 
-  if (!data) {
+  if (!isLoaded || !data) {
     return (
       <main className="result-page">
         <div className="loading-spinner">
@@ -52,14 +59,8 @@ export default function ResultPage() {
 
   const readinessApplies = isCirsApplicableProcedure(data.procedure);
   const readiness = readinessApplies ? assessCollagenReadiness(data) : null;
+  const painAssessment = assessPainSensitivity(data);
   const canAddProcedures = !readiness || (readiness.grade === 'Green' && !readiness.shouldBlockAddOns);
-  const readinessScore = !readiness
-    ? ''
-    : !readiness.isComplete
-    ? 'CIRS 미작성'
-    : readiness.redFlags.length > 0
-    ? `CIRS ${readiness.totalScore}점 + 보류 기준`
-    : `CIRS ${readiness.totalScore}점`;
 
   return (
     <main className="result-page" style={{ 
@@ -85,7 +86,7 @@ export default function ResultPage() {
           <div className="readiness-heading">
             <AlertTriangle size={20} />
             <div>
-              <p className="readiness-kicker">{readinessScore}</p>
+              <p className="readiness-kicker">피부 회복력 확인</p>
               <h2>{readiness.label}</h2>
             </div>
           </div>
@@ -100,6 +101,17 @@ export default function ResultPage() {
           )}
         </section>
       )}
+
+      <section className={`pain-panel ${painAssessment.level}`}>
+        <div className="readiness-heading">
+          <HeartPulse size={20} />
+          <div>
+            <p className="readiness-kicker">모든 시술 공통</p>
+            <h2>통증 민감도: {painAssessment.label}</h2>
+          </div>
+        </div>
+        <p className="readiness-strategy">{painAssessment.strategy}</p>
+      </section>
 
       {canAddProcedures ? (
         <section className="add-on-panel">

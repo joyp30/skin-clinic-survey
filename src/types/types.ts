@@ -135,14 +135,10 @@ export interface SurveyFormData {
   skinType: string;
   painSensitivity: string;
   skinConcerns: string;
-  cirsContraindications: string;
-  cirsErythemaHeat: string;
-  cirsStingingItching: string;
-  cirsDrynessFlaking: string;
-  cirsPihTendency: string;
-  cirsRecoveryDelay: string;
-  cirsInflammatoryLesions: string;
-  cirsSystemicBurden: string;
+  cirsAcuteLesion: string;
+  cirsCurrentSensitivity: string;
+  cirsPersistentMarks: string;
+  cirsRecentIrritation: string;
 
   // Additional
   additionalNotes: string;

@@ -912,6 +912,7 @@ body {
 }
 
 .readiness-panel,
+.pain-panel,
 .add-on-panel,
 .stabilization-panel {
   margin-top: 24px;
@@ -921,6 +922,27 @@ body {
   border-radius: var(--radius-lg);
   text-align: left;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+}
+
+.pain-panel {
+  margin-top: 14px;
+  border-color: rgba(14, 165, 233, 0.35);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(20, 25, 40, 0.45));
+}
+
+.pain-panel.enhanced,
+.pain-panel.intensive {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(20, 25, 40, 0.45));
+}
+
+.pain-panel .readiness-heading svg {
+  color: #38bdf8;
+}
+
+.pain-panel.enhanced .readiness-heading svg,
+.pain-panel.intensive .readiness-heading svg {
+  color: var(--warning);
 }
 
 .readiness-panel.green {
@@ -967,6 +989,7 @@ body {
 }
 
 .readiness-heading h2,
+.pain-panel h2,
 .add-on-panel h3,
 .stabilization-panel h3 {
   color: var(--text-primary);

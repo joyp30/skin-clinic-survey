@@ -1,5 +1,5 @@
 import { ProcedureInfo, Question, SurveyStep } from '@/types/types';
-import { hasCompleteCirsResponses, isCirsApplicableProcedure } from '@/utils/cirs';
+import { isCirsApplicableProcedure } from '@/utils/cirs';
 
 export const procedures: ProcedureInfo[] = [
   {
@@ -666,13 +666,13 @@ export const skinStatusQuestions: Question[] = [
   {
     id: 'painSensitivity',
     category: '피부상태',
-    text: '통증에 대한 민감도는 어느 정도인가요?',
-    subtext: '(중복 선택 가능)',
-    type: 'checkbox',
+    text: '레이저, 주사, 압출 등의 통증에 얼마나 민감한 편인가요?',
+    subtext: '통증 관리 방법과 시술 진행 속도를 정하는 데 사용합니다.',
+    type: 'radio',
     options: [
-      { label: '민감하지 않음', value: '민감하지 않음' },
+      { label: '낮음', value: '낮음' },
       { label: '보통', value: '보통' },
-      { label: '민감함', value: '높음' },
+      { label: '높음', value: '높음' },
       { label: '매우 민감함', value: '매우 높음' },
       { label: '잘 모르겠음', value: '잘 모르겠음' },
     ],
@@ -705,115 +705,50 @@ export const skinStatusQuestions: Question[] = [
 
 export const cirsReadinessQuestions: Question[] = [
   {
-    id: 'cirsContraindications',
+    id: 'cirsAcuteLesion',
     category: '피부회복력',
-    text: '현재 시술보다 진정이나 진료가 먼저 필요해 보이는 상태가 있나요?',
-    subtext: '해당 항목이 있으면 강한 자극 시술보다 안정화가 우선입니다.',
-    type: 'checkbox',
-    options: [
-      { label: '해당 없음', value: 'none' },
-      { label: '농포, 진물, 딱지 등 감염 의심', value: 'infection' },
-      { label: '급성 피부염 또는 통증성 병변', value: 'acuteDermatitis' },
-      { label: '선번 또는 박피 직후', value: 'sunburnPeeling' },
-      { label: '주사 flare, 뚜렷한 열감/홍조', value: 'rosaceaFlare' },
-      { label: '활동성 여드름이 많음', value: 'activeAcne' },
-      { label: '최근 레티노이드/AHA/BHA/스크럽/홈필링 과사용', value: 'strongHomecare' },
-    ],
+    text: '지금 얼굴에 진물, 고름, 물집, 상처 또는 만지면 아픈 피부염이 있나요?',
+    subtext: '현재 급성 염증이나 감염 가능성을 확인합니다.',
+    type: 'yesno',
     required: true,
   },
   {
-    id: 'cirsErythemaHeat',
+    id: 'cirsCurrentSensitivity',
     category: '피부회복력',
-    text: '현재 홍반이나 열감은 어느 정도인가요?',
-    type: 'radio',
-    options: [
-      { label: '없음', value: '0' },
-      { label: '경미하거나 간헐적', value: '1' },
-      { label: '뚜렷하거나 지속됨', value: '2' },
-    ],
+    text: '최근 7일 동안 평소 세안이나 화장품에도 따갑거나 화끈거리고, 붉음, 가려움 또는 각질이 계속되었나요?',
+    subtext: '현재 피부장벽과 민감 반응이 안정적인지 확인합니다.',
+    type: 'yesno',
     required: true,
   },
   {
-    id: 'cirsStingingItching',
+    id: 'cirsPersistentMarks',
     category: '피부회복력',
-    text: '따가움이나 가려움은 어느 정도인가요?',
-    type: 'radio',
-    options: [
-      { label: '없음', value: '0' },
-      { label: '가끔 있음', value: '1' },
-      { label: '자주 있거나 일상에 불편함', value: '2' },
-    ],
+    text: '여드름, 상처 또는 피부관리 후 붉거나 갈색인 자국이 잘 생기고 오래 남는 편인가요?',
+    subtext: '색소침착과 회복 지연 경향을 확인합니다.',
+    type: 'yesno',
     required: true,
   },
   {
-    id: 'cirsDrynessFlaking',
+    id: 'cirsRecentIrritation',
     category: '피부회복력',
-    text: '건조함이나 각질은 어느 정도인가요?',
-    type: 'radio',
-    options: [
-      { label: '없음', value: '0' },
-      { label: '경미함', value: '1' },
-      { label: '뚜렷하거나 화장이 들뜸', value: '2' },
-    ],
-    required: true,
-  },
-  {
-    id: 'cirsPihTendency',
-    category: '피부회복력',
-    text: '색소침착(PIH)이 생기거나 악화된 적이 있나요?',
-    type: 'radio',
-    options: [
-      { label: '없음', value: '0' },
-      { label: '과거에 있었음', value: '1' },
-      { label: '최근 악화되었거나 반복됨', value: '2' },
-    ],
-    required: true,
-  },
-  {
-    id: 'cirsRecoveryDelay',
-    category: '피부회복력',
-    text: '이전 시술이나 피부 자극 후 회복은 어땠나요?',
-    type: 'radio',
-    options: [
-      { label: '정상적으로 회복됨', value: '0' },
-      { label: '조금 느린 편', value: '1' },
-      { label: '붉음, 멍, 딱지, 색소가 오래감', value: '2' },
-    ],
-    required: true,
-  },
-  {
-    id: 'cirsInflammatoryLesions',
-    category: '피부회복력',
-    text: '현재 염증성 병변은 어느 정도인가요?',
-    type: 'radio',
-    options: [
-      { label: '없음', value: '0' },
-      { label: '소수 있음', value: '1' },
-      { label: '다수이거나 활동성', value: '2' },
-    ],
-    required: true,
-  },
-  {
-    id: 'cirsSystemicBurden',
-    category: '피부회복력',
-    text: '최근 회복력을 떨어뜨릴 수 있는 요인이 있나요?',
-    subtext: '수면부족, 흡연, 음주, 당뇨/갑상선/빈혈, 저단백 식이, 급격한 체중감량 등',
-    type: 'radio',
-    options: [
-      { label: '해당 없음', value: '0' },
-      { label: '1개 정도 해당', value: '1' },
-      { label: '2개 이상 해당', value: '2' },
-    ],
+    text: '최근 7일 안에 강한 햇빛, 홈필링, 스크럽, 레티노이드, 각질제거제 또는 다른 피부 시술로 자극받았나요?',
+    subtext: '최근 피부에 누적된 자극을 확인합니다.',
+    type: 'yesno',
     required: true,
   },
 ];
 
-export function getStepsForProcedure(procedure: string, skipCommon: boolean = false, formValues?: Record<string, string | undefined>): SurveyStep[] {
+export function getStepsForProcedure(
+  procedure: string,
+  skipCommon: boolean = false,
+  formValues?: Record<string, string | undefined>,
+  reuseCompletedCirs: boolean = false
+): SurveyStep[] {
   const steps: SurveyStep[] = [];
   const proceduresArray = procedure.split(',').map(p => p.trim());
   const shouldAskCirs =
     isCirsApplicableProcedure(procedure) &&
-    (!skipCommon || !formValues || !hasCompleteCirsResponses(formValues));
+    (!skipCommon || !reuseCompletedCirs);
 
   if (!skipCommon) {
     steps.push({

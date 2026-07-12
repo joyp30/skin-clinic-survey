@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getStepsForProcedure } from '@/data/questionData';
 import { SurveyFormData, ProcedureType } from '@/types/types';
+import { hasCompleteCirsResponses } from '@/utils/cirs';
 import ProgressBar from '@/components/ProgressBar';
 import QuestionCard from '@/components/QuestionCard';
 import NavButtons from '@/components/NavButtons';
@@ -18,6 +19,7 @@ function SurveyContent() {
 
   const [currentStep, setCurrentStep] = useState(0);
   const [unansweredIds, setUnansweredIds] = useState<string[]>([]);
+  const [reuseCompletedCirs, setReuseCompletedCirs] = useState(false);
 
   const { setValue, getValues, watch, reset } = useForm<SurveyFormData>({
     defaultValues: {
@@ -89,14 +91,10 @@ function SurveyContent() {
       skinType: '',
       painSensitivity: '',
       skinConcerns: '',
-      cirsContraindications: '',
-      cirsErythemaHeat: '',
-      cirsStingingItching: '',
-      cirsDrynessFlaking: '',
-      cirsPihTendency: '',
-      cirsRecoveryDelay: '',
-      cirsInflammatoryLesions: '',
-      cirsSystemicBurden: '',
+      cirsAcuteLesion: '',
+      cirsCurrentSensitivity: '',
+      cirsPersistentMarks: '',
+      cirsRecentIrritation: '',
       additionalNotes: '',
     },
   });
@@ -104,7 +102,7 @@ function SurveyContent() {
   // Watch all form values for re-renders
   const formValues = watch();
 
-  const steps = getStepsForProcedure(procedure, skipCommon, formValues);
+  const steps = getStepsForProcedure(procedure, skipCommon, formValues, reuseCompletedCirs);
   const currentQuestions = steps[currentStep]?.questions || [];
 
   const handleFieldChange = useCallback(
@@ -130,6 +128,7 @@ function SurveyContent() {
       if (stored) {
         try {
           const parsed = JSON.parse(stored) as SurveyFormData;
+          setReuseCompletedCirs(hasCompleteCirsResponses(parsed));
           const currentData = getValues();
           reset({
             ...currentData,
@@ -146,14 +145,10 @@ function SurveyContent() {
             skinType: parsed.skinType,
             painSensitivity: parsed.painSensitivity,
             skinConcerns: parsed.skinConcerns,
-            cirsContraindications: parsed.cirsContraindications,
-            cirsErythemaHeat: parsed.cirsErythemaHeat,
-            cirsStingingItching: parsed.cirsStingingItching,
-            cirsDrynessFlaking: parsed.cirsDrynessFlaking,
-            cirsPihTendency: parsed.cirsPihTendency,
-            cirsRecoveryDelay: parsed.cirsRecoveryDelay,
-            cirsInflammatoryLesions: parsed.cirsInflammatoryLesions,
-            cirsSystemicBurden: parsed.cirsSystemicBurden,
+            cirsAcuteLesion: parsed.cirsAcuteLesion,
+            cirsCurrentSensitivity: parsed.cirsCurrentSensitivity,
+            cirsPersistentMarks: parsed.cirsPersistentMarks,
+            cirsRecentIrritation: parsed.cirsRecentIrritation,
           });
         } catch {
           console.error("Failed to parse previous surveyData");

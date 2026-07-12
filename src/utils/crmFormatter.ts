@@ -8,6 +8,7 @@ import {
   acneQuestions,
 } from '@/data/questionData';
 import { assessCollagenReadiness, isCirsApplicableProcedure } from '@/utils/cirs';
+import { assessPainSensitivity } from '@/utils/painSensitivity';
 
 const procedureNames: Record<string, string> = {
   botox: '보톡스',
@@ -24,18 +25,23 @@ export function generateCrmText(data: SurveyFormData): string {
   const readiness = isCirsApplicableProcedure(data.procedure)
     ? assessCollagenReadiness(data)
     : null;
+  const painAssessment = assessPainSensitivity(data);
 
   // --- [주의] Warnings ---
   const warnings: string[] = [];
 
   if (readiness && !readiness.isComplete) {
-    warnings.push(`CIRS 미작성: 피부 회복력 확인 후 시술 강도 결정`);
+    warnings.push(`피부 회복력 미작성: 피부 상태 확인 후 시술 강도 결정`);
   } else if (readiness?.grade === 'Red') {
-    warnings.push(`CIRS Red: 안정화 우선 - 강한 자극 시술 보류`);
+    warnings.push(`피부 회복력 Red: 진료와 안정화 우선 - 자극 시술 보류`);
   } else if (readiness?.grade === 'Yellow') {
-    warnings.push(`CIRS Yellow: pre-conditioning 후 저강도/긴 간격 권장`);
+    warnings.push(`피부 회복력 Yellow: 피부 안정화 후 시술 여부 결정`);
   } else if (readiness?.shouldBlockAddOns) {
     warnings.push(`민감 신호: 추가 시술보다 피부 상태 재확인 권장`);
+  }
+
+  if (painAssessment.needsWarning) {
+    warnings.push(`통증 민감도 ${data.painSensitivity}: 사전 통증 관리 계획 필요`);
   }
 
   // Common warnings
@@ -96,13 +102,11 @@ export function generateCrmText(data: SurveyFormData): string {
 
   lines.push(`[시술] ${procedureDetail} 희망`);
 
+  lines.push(`[통증민감도] ${painAssessment.label}`);
+  lines.push(`[통증관리] ${painAssessment.strategy}`);
+
   if (readiness) {
-    const scorePrefix = !readiness.isComplete
-      ? 'CIRS 미작성'
-      : readiness.redFlags.length > 0
-      ? `CIRS ${readiness.totalScore}점 + 보류 기준`
-      : `CIRS ${readiness.totalScore}점`;
-    lines.push(`[피부회복력] ${scorePrefix}, ${readiness.label}`);
+    lines.push(`[피부회복력] ${readiness.label}`);
     lines.push(`[시술순서] ${readiness.strategy}`);
     if (readiness.reasons.length > 0) {
       lines.push(`[판정근거] ${readiness.reasons.slice(0, 8).join(', ')}`);
@@ -265,7 +269,7 @@ export function generateCrmText(data: SurveyFormData): string {
     // Sensitivities and type (from common skin section if available)
     const skinType = data.skinType || '미기재';
     const sensitivity = data.painSensitivity || '미기재';
-    poreLines.push(`■ 피부타입/민감도: ${skinType} / ${sensitivity}`);
+    poreLines.push(`■ 피부타입/통증민감도: ${skinType} / ${sensitivity}`);
 
     // Habits & Area
     const habits: string[] = [];
@@ -320,9 +324,6 @@ export function generateCrmText(data: SurveyFormData): string {
   // --- [피부상태 및 사진가이드] Skin status & conditions ---
   const skinParts: string[] = [];
   if (data.skinType) skinParts.push(data.skinType);
-  if (data.painSensitivity && data.painSensitivity !== '보통') {
-    skinParts.push(`통증/민감도: ${data.painSensitivity}`);
-  }
   if (data.skinConcerns) skinParts.push(`고민: ${data.skinConcerns}`);
   if (data.liftingSleepHabit) skinParts.push(`수면 자세: ${data.liftingSleepHabit}`);
 

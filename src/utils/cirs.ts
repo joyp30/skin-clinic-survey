@@ -3,42 +3,28 @@ import { SurveyFormData } from '@/types/types';
 export type CirsGrade = 'Green' | 'Yellow' | 'Red';
 
 type CirsField =
-  | 'cirsErythemaHeat'
-  | 'cirsStingingItching'
-  | 'cirsDrynessFlaking'
-  | 'cirsPihTendency'
-  | 'cirsRecoveryDelay'
-  | 'cirsInflammatoryLesions'
-  | 'cirsSystemicBurden';
-
-interface CirsScoreItem {
-  id: CirsField;
-  label: string;
-  score: number;
-}
+  | 'cirsAcuteLesion'
+  | 'cirsCurrentSensitivity'
+  | 'cirsPersistentMarks'
+  | 'cirsRecentIrritation';
 
 export interface CirsAssessment {
-  totalScore: number;
   grade: CirsGrade;
   label: string;
   isComplete: boolean;
-  scoreItems: CirsScoreItem[];
   redFlags: string[];
-  sensitiveSignals: string[];
+  cautionSignals: string[];
   reasons: string[];
   patientMessage: string;
   strategy: string;
   shouldBlockAddOns: boolean;
 }
 
-const SCORE_FIELDS: Array<{ id: CirsField; label: string }> = [
-  { id: 'cirsErythemaHeat', label: '홍반/열감' },
-  { id: 'cirsStingingItching', label: '따가움/가려움' },
-  { id: 'cirsDrynessFlaking', label: '건조/각질' },
-  { id: 'cirsPihTendency', label: 'PIH 경향' },
-  { id: 'cirsRecoveryDelay', label: '시술 후 회복' },
-  { id: 'cirsInflammatoryLesions', label: '염증성 병변' },
-  { id: 'cirsSystemicBurden', label: '전신 회복력 부담' },
+const CIRS_FIELDS: CirsField[] = [
+  'cirsAcuteLesion',
+  'cirsCurrentSensitivity',
+  'cirsPersistentMarks',
+  'cirsRecentIrritation',
 ];
 
 const CIRS_APPLICABLE_PROCEDURES = new Set([
@@ -49,29 +35,6 @@ const CIRS_APPLICABLE_PROCEDURES = new Set([
   'pore',
 ]);
 
-const CONTRA_LABELS: Record<string, string> = {
-  infection: '감염 의심/농포/진물/crust',
-  acuteDermatitis: '급성 피부염/통증성 병변',
-  sunburnPeeling: '선번 또는 박피 직후',
-  rosaceaFlare: '주사 flare/뚜렷한 열감',
-  activeAcne: '활동성 여드름 과다',
-  strongHomecare: '최근 강한 홈케어 자극',
-};
-
-const splitValues = (value?: string) =>
-  (value || '')
-    .split(',')
-    .map((item) => item.trim())
-    .filter(Boolean);
-
-const parseScore = (value?: string) => {
-  const score = Number.parseInt(value || '0', 10);
-  return Number.isFinite(score) ? score : 0;
-};
-
-const includesAny = (value: string | undefined, needles: string[]) =>
-  needles.some((needle) => (value || '').includes(needle));
-
 export function isCirsApplicableProcedure(procedure?: string) {
   return (procedure || '')
     .split(',')
@@ -80,115 +43,101 @@ export function isCirsApplicableProcedure(procedure?: string) {
 }
 
 export function hasCompleteCirsResponses(data: Record<string, string | undefined>) {
-  return Boolean(data.cirsContraindications) && SCORE_FIELDS.every(({ id }) => data[id] !== undefined && data[id] !== '');
+  return CIRS_FIELDS.every((field) => data[field] === 'yes' || data[field] === 'no');
 }
 
 export function assessCollagenReadiness(data: SurveyFormData): CirsAssessment {
-  const scoreItems = SCORE_FIELDS.map(({ id, label }) => ({
-    id,
-    label,
-    score: parseScore(data[id]),
-  }));
   const isComplete = hasCompleteCirsResponses(data);
+  const hasAcuteLesion = data.cirsAcuteLesion === 'yes';
+  const hasCurrentSensitivity = data.cirsCurrentSensitivity === 'yes';
+  const hasPersistentMarks = data.cirsPersistentMarks === 'yes';
+  const hasRecentIrritation = data.cirsRecentIrritation === 'yes';
 
-  const totalScore = scoreItems.reduce((sum, item) => sum + item.score, 0);
-  const redFlags = splitValues(data.cirsContraindications)
-    .filter((value) => value !== 'none')
-    .map((value) => CONTRA_LABELS[value] || value);
-
-  let grade: CirsGrade = 'Green';
-  if (redFlags.length > 0 || totalScore >= 8) {
-    grade = 'Red';
-  } else if (totalScore >= 4) {
-    grade = 'Yellow';
-  }
-
-  const sensitiveSignals: string[] = [];
-  if (includesAny(data.skinType, ['얇고 예민한 피부', '건성 피부'])) {
-    sensitiveSignals.push('얇고 예민하거나 건조한 피부');
-  }
-  if (includesAny(data.painSensitivity, ['높음', '매우 높음'])) {
-    sensitiveSignals.push('통증/자극 민감도 높음');
-  }
-  scoreItems
-    .filter((item) => item.score >= 2)
-    .forEach((item) => sensitiveSignals.push(`${item.label} 뚜렷`));
-
-  const reasons = [
-    ...redFlags,
-    ...scoreItems
-      .filter((item) => item.score > 0)
-      .map((item) => `${item.label} ${item.score}점`),
-    ...sensitiveSignals,
-  ];
+  const redFlags = hasAcuteLesion
+    ? ['진물, 고름, 물집, 상처 또는 통증성 피부염']
+    : [];
+  const cautionSignals = [
+    hasCurrentSensitivity ? '최근 지속되는 따가움, 붉음, 가려움 또는 각질' : '',
+    hasPersistentMarks ? '붉거나 갈색인 자국이 오래 남는 경향' : '',
+    hasRecentIrritation ? '최근 7일 이내 피부 자극' : '',
+  ].filter(Boolean);
+  const reasons = [...redFlags, ...cautionSignals];
 
   if (!isComplete) {
     return {
-      totalScore,
       grade: 'Yellow',
-      label: 'CIRS 미작성 - 피부 회복력 확인 필요',
+      label: '피부 회복력 확인 필요',
       isComplete,
-      scoreItems,
       redFlags,
-      sensitiveSignals,
-      reasons: reasons.length > 0 ? reasons : ['CIRS 문진 미작성'],
+      cautionSignals,
+      reasons: reasons.length > 0 ? reasons : ['피부 회복력 문진 미작성'],
       patientMessage:
-        '피부 회복력 문진이 아직 충분하지 않아 자극 시술 가능 여부를 바로 판단하기 어렵습니다.',
+        '피부 회복력 문진이 충분하지 않아 자극 시술 가능 여부를 바로 판단하기 어렵습니다.',
       strategy:
-        '홍반, 따가움, 건조, PIH, 회복 지연, 염증성 병변, 전신 회복력 부담을 확인한 뒤 시술 강도와 순서를 정합니다.',
+        '현재 급성 병변, 피부 민감 반응, 색소침착 경향과 최근 피부 자극을 확인한 뒤 시술 여부를 정합니다.',
       shouldBlockAddOns: true,
     };
   }
 
-  if (grade === 'Red') {
+  if (hasAcuteLesion) {
     return {
-      totalScore,
-      grade,
-      label: 'Red - 안정화 우선',
+      grade: 'Red',
+      label: '진료와 피부 안정화 우선',
       isComplete,
-      scoreItems,
       redFlags,
-      sensitiveSignals,
+      cautionSignals,
       reasons,
       patientMessage:
-        '지금은 콜라겐을 만들도록 세게 자극하기보다, 먼저 피부가 자극을 견딜 수 있는 상태로 회복시키는 단계입니다.',
+        '현재는 선택적인 자극 시술보다 피부 상태를 먼저 확인하고 안정시키는 단계입니다.',
       strategy:
-        '진정, 보습, 광보호, 염증 조절 후 재평가합니다. 강한 RF, 박피, 고출력 레이저, 공격적 니들링, 같은 날 다중 자극은 보류합니다.',
+        '감염이나 급성 피부염 여부를 확인하고 진정, 염증 조절과 피부 회복 후 시술을 재평가합니다.',
       shouldBlockAddOns: true,
     };
   }
 
-  if (grade === 'Yellow') {
+  if (hasCurrentSensitivity || (hasPersistentMarks && hasRecentIrritation)) {
     return {
-      totalScore,
-      grade,
-      label: 'Yellow - 전처치 후 저강도',
+      grade: 'Yellow',
+      label: '피부 안정화 후 시술 결정',
       isComplete,
-      scoreItems,
       redFlags,
-      sensitiveSignals,
+      cautionSignals,
       reasons,
       patientMessage:
-        '피부가 완전히 나쁜 상태는 아니지만 불안정 요소가 있어 강도를 낮추고 간격을 길게 잡는 것이 안전합니다.',
+        '현재 피부가 자극에 예민하거나 회복 부담이 겹쳐 있어 시술 전 피부 상태 확인이 필요합니다.',
       strategy:
-        '2-4주 장벽 안정화와 pre-conditioning 후 낮은 강도, 작은 면적, 긴 간격, test spot 중심으로 접근합니다.',
+        '강한 레이저, 박피, 니들링, RF와 같은 복합 자극은 바로 진행하지 않고 피부 안정화 후 강도와 범위를 결정합니다.',
       shouldBlockAddOns: true,
+    };
+  }
+
+  if (hasPersistentMarks || hasRecentIrritation) {
+    return {
+      grade: 'Green',
+      label: '보수적으로 시작',
+      isComplete,
+      redFlags,
+      cautionSignals,
+      reasons,
+      patientMessage:
+        '현재 급성 위험 신호는 없지만 색소침착이나 최근 자극 이력을 고려한 시술 계획이 필요합니다.',
+      strategy:
+        '첫 시술은 검증된 보수적 설정과 제한된 자극으로 시작하고, 같은 날 여러 자극을 겹칠지는 의료진이 판단합니다.',
+      shouldBlockAddOns: false,
     };
   }
 
   return {
-    totalScore,
-    grade,
-    label: 'Green - 단계적 collagen induction 가능',
+    grade: 'Green',
+    label: '일반적인 시술 평가 가능',
     isComplete,
-    scoreItems,
     redFlags,
-    sensitiveSignals,
+    cautionSignals,
     reasons,
     patientMessage:
-      '장벽과 염증이 비교적 안정되어 있어 탄력과 피부결 개선을 위한 collagen induction 시술을 단계적으로 진행할 수 있습니다.',
+      '현재 문진에서 피부 회복을 방해할 뚜렷한 위험 신호는 확인되지 않았습니다.',
     strategy:
-      '목표에 맞춰 RF microneedling, fractional, HIFU/RF, collagen booster, PN/HA를 단계적으로 계획합니다.',
-    shouldBlockAddOns: sensitiveSignals.length >= 2,
+      '시술별 금기사항과 의료진 진찰을 확인한 뒤 피부 상태와 목표에 맞춰 시술 계획을 정합니다.',
+    shouldBlockAddOns: false,
   };
 }
