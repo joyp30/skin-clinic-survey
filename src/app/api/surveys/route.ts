@@ -26,7 +26,12 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const { createdAts } = await request.json();
+    const { createdAts, deleteAll } = await request.json();
+
+    if (deleteAll === true) {
+      await kv.del('surveys');
+      return NextResponse.json({ success: true });
+    }
     
     if (!createdAts || !Array.isArray(createdAts)) {
        return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });

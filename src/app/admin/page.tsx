@@ -58,6 +58,7 @@ export default function AdminDashboard() {
   const [activeSurveyIndex, setActiveSurveyIndex] = useState(0);
   const [copied, setCopied] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   // Auth state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -192,6 +193,37 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteAll = async () => {
+    if (history.length === 0 || isDeletingAll) return;
+    if (!confirm(`문진 기록 ${history.length}건을 모두 삭제하시겠습니까?\n\n삭제한 기록은 복구할 수 없습니다.`)) return;
+
+    setIsDeletingAll(true);
+    try {
+      const res = await fetch('/api/surveys', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deleteAll: true }),
+      });
+
+      if (!res.ok) {
+        alert('전체 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+        return;
+      }
+
+      setHistory([]);
+      setSelectedGroup(null);
+      setActiveSurveyIndex(0);
+      setSearchTerm('');
+      localStorage.removeItem('surveyHistory');
+      alert('모든 문진 기록을 삭제했습니다.');
+    } catch (error) {
+      console.error(error);
+      alert('전체 삭제 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeletingAll(false);
+    }
+  };
+
   const handleAuth = (e: React.FormEvent) => {
     e.preventDefault();
     if (password === 'csdermastaff') {
@@ -256,7 +288,7 @@ export default function AdminDashboard() {
           <h1>직원용 문진 현황 대시보드</h1>
         </motion.div>
         <motion.div
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '4px' }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '12px', marginTop: '4px' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -266,7 +298,7 @@ export default function AdminDashboard() {
           </p>
           <button
             onClick={() => fetchSurveys(true)}
-            disabled={isRefreshing}
+            disabled={isRefreshing || isDeletingAll}
             title="목록 새로고침"
             style={{
               display: 'flex',
@@ -279,8 +311,8 @@ export default function AdminDashboard() {
               color: 'var(--accent-secondary)',
               border: '1px solid rgba(139, 92, 246, 0.3)',
               borderRadius: '20px',
-              cursor: isRefreshing ? 'not-allowed' : 'pointer',
-              opacity: isRefreshing ? 0.6 : 1,
+              cursor: isRefreshing || isDeletingAll ? 'not-allowed' : 'pointer',
+              opacity: isRefreshing || isDeletingAll ? 0.6 : 1,
               transition: 'all 0.2s',
             }}
           >
@@ -291,6 +323,29 @@ export default function AdminDashboard() {
               }}
             />
             {isRefreshing ? '업데이트 중...' : '새로고침'}
+          </button>
+          <button
+            onClick={handleDeleteAll}
+            disabled={history.length === 0 || isRefreshing || isDeletingAll}
+            title="모든 문진 기록 삭제"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              background: 'rgba(239, 68, 68, 0.15)',
+              color: '#fca5a5',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: '20px',
+              cursor: history.length === 0 || isRefreshing || isDeletingAll ? 'not-allowed' : 'pointer',
+              opacity: history.length === 0 || isRefreshing || isDeletingAll ? 0.5 : 1,
+              transition: 'all 0.2s',
+            }}
+          >
+            <Trash2 size={14} />
+            {isDeletingAll ? '삭제 중...' : '전체 삭제'}
           </button>
         </motion.div>
       </div>
