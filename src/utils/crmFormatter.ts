@@ -6,6 +6,7 @@ import {
   pigmentQuestions,
   liftingQuestions,
   acneQuestions,
+  androgeneticAlopeciaQuestions,
 } from '@/data/questionData';
 import { assessCollagenReadiness, isCirsApplicableProcedure } from '@/utils/cirs';
 import { assessPainSensitivity } from '@/utils/painSensitivity';
@@ -18,6 +19,7 @@ const procedureNames: Record<string, string> = {
   acne: '여드름',
   scar: '흉터',
   pore: '모공 집중 케어',
+  androgeneticAlopecia: '안드로겐탈모(남성형탈모, 여성형탈모)',
 };
 
 export function generateCrmText(data: SurveyFormData): string {
@@ -26,6 +28,9 @@ export function generateCrmText(data: SurveyFormData): string {
     ? assessCollagenReadiness(data)
     : null;
   const painAssessment = assessPainSensitivity(data);
+  const painAssessmentApplies = data.procedure
+    .split(',')
+    .some((item) => item.trim() !== 'androgeneticAlopecia');
 
   // --- [주의] Warnings ---
   const warnings: string[] = [];
@@ -40,7 +45,7 @@ export function generateCrmText(data: SurveyFormData): string {
     warnings.push(`민감 신호: 추가 시술보다 피부 상태 재확인 권장`);
   }
 
-  if (painAssessment.needsWarning) {
+  if (painAssessmentApplies && painAssessment.needsWarning) {
     warnings.push(`통증 민감도 ${data.painSensitivity}: 사전 통증 관리 계획 필요`);
   }
 
@@ -60,6 +65,7 @@ export function generateCrmText(data: SurveyFormData): string {
     else if (p === 'pigment') procQuestions.push(...pigmentQuestions);
     else if (p === 'lifting') procQuestions.push(...liftingQuestions);
     else if (p === 'acne') procQuestions.push(...acneQuestions);
+    else if (p === 'androgeneticAlopecia') procQuestions.push(...androgeneticAlopeciaQuestions);
   });
 
   procQuestions.forEach((q) => {
@@ -67,6 +73,34 @@ export function generateCrmText(data: SurveyFormData): string {
       warnings.push(q.warningMessage);
     }
   });
+
+  if (data.procedure.includes('androgeneticAlopecia')) {
+    if (data.hairPattern?.includes('국소 반점형')) {
+      warnings.push('동전모양/반점형 탈모: 원형탈모 등 다른 탈모 감별 필요');
+    }
+    if (
+      data.hairScalpSymptoms?.includes('붉음/염증/뾰루지') ||
+      data.hairScalpSymptoms?.includes('통증/화끈거림') ||
+      data.hairScalpSymptoms?.includes('딱지/진물/상처')
+    ) {
+      warnings.push('두피 염증·통증·딱지: 염증성/반흔성 탈모 감별 필요');
+    }
+    if (data.hairCourse === '최근 급격히 악화' || data.hairShedding === '심한 증가') {
+      warnings.push('최근 급격한 악화/심한 탈락: 휴지기탈모 등 동반 원인 평가');
+    }
+    if (
+      data.hairFemaleAndrogenSigns?.includes('급격한 안드로겐 증상') ||
+      data.hairFemaleAndrogenSigns?.includes('남성화 변화')
+    ) {
+      warnings.push('여성의 급격한 안드로겐 증상/남성화: 내분비 원인 신속 평가');
+    }
+    if (
+      data.hairTreatmentSafety &&
+      data.hairTreatmentSafety !== '관련 질환 없음'
+    ) {
+      warnings.push(`먹는 미녹시딜 안전 확인 필요: ${data.hairTreatmentSafety}`);
+    }
+  }
 
   warnings.forEach((w) => {
     lines.push(`[주의] ${w}`);
@@ -102,8 +136,10 @@ export function generateCrmText(data: SurveyFormData): string {
 
   lines.push(`[시술] ${procedureDetail} 희망`);
 
-  lines.push(`[통증민감도] ${painAssessment.label}`);
-  lines.push(`[통증관리] ${painAssessment.strategy}`);
+  if (painAssessmentApplies) {
+    lines.push(`[통증민감도] ${painAssessment.label}`);
+    lines.push(`[통증관리] ${painAssessment.strategy}`);
+  }
 
   if (readiness) {
     lines.push(`[피부회복력] ${readiness.label}`);
@@ -300,6 +336,71 @@ export function generateCrmText(data: SurveyFormData): string {
       lines.push(...poreLines);
       lines.push(''); // add empty line
     }
+  }
+
+  // --- [안드로겐탈모 초진] Male/Female pattern hair loss ---
+  if (data.procedure.includes('androgeneticAlopecia')) {
+    const hairLines: string[] = [];
+
+    hairLines.push(
+      `■ 시작/경과: ${data.hairOnset || '미기재'} / ${data.hairCourse || '미기재'}`
+    );
+    hairLines.push(
+      `■ 주관적 변화: ${data.hairMainChange || '미기재'} / 탈락량: ${data.hairShedding || '미기재'}`
+    );
+    hairLines.push(
+      `■ 분포: ${data.hairPattern || '미기재'} / 가족력: ${data.hairFamilyHistory || '미기재'}`
+    );
+    hairLines.push(`■ 두피 증상: ${data.hairScalpSymptoms || '미기재'}`);
+    hairLines.push(`■ 2~6개월 전 유발요인: ${data.hairRecentTriggers || '미기재'}`);
+    hairLines.push(`■ 영양·철결핍 위험: ${data.hairNutritionRisk || '미기재'}`);
+    hairLines.push(`■ 동반질환: ${data.hairMedicalHistory || '미기재'}`);
+
+    const previousTreatment = data.hairPreviousTreatmentDetail
+      ? `${data.hairPreviousTreatment || '미기재'} (${data.hairPreviousTreatmentDetail})`
+      : data.hairPreviousTreatment || '미기재';
+    hairLines.push(`■ 이전 치료: ${previousTreatment}`);
+
+    if (data.patientGender === '여성') {
+      hairLines.push(
+        `■ 여성 호르몬 문진: 생리/완경 ${data.hairFemaleCycle || '미기재'} / 과다월경 ${data.hairFemaleHeavyMenses || '미기재'}`
+      );
+      hairLines.push(
+        `■ 고안드로겐 신호: ${data.hairFemaleAndrogenSigns || '미기재'} / 호르몬제 ${data.hairFemaleHormoneUse || '미기재'} / 임신계획 ${data.hairFemalePregnancyPlan || '미기재'}`
+      );
+    }
+
+    if (data.patientGender === '남성') {
+      hairLines.push(
+        `■ 남성 문진: 안드로겐/스테로이드 ${data.hairMaleAndrogenUse || '미기재'} / 만 45세 이상 ${data.hairMale45Plus || '미기재'}`
+      );
+      if (data.hairMale45Plus === 'yes') {
+        hairLines.push(`■ 전립선/PSA 상태: ${data.hairMaleProstateStatus || '미기재'}`);
+      }
+    }
+
+    hairLines.push(`■ 치료 안전: ${data.hairTreatmentSafety || '미기재'}`);
+    hairLines.push(`■ 치료 목표: ${data.hairTreatmentGoal || '미기재'}`);
+
+    lines.push('\n[안드로겐탈모 초진]');
+    lines.push(...hairLines);
+
+    lines.push('\n[초진 혈액검사 의향]');
+    lines.push(`■ 검사 희망: ${data.hairBloodTestPreference || '미기재'}`);
+    if (data.hairBloodTestPreference === '검사 희망') {
+      lines.push(`■ 관심 항목: ${data.hairBloodTestItems || '미기재'}`);
+      if (data.patientGender === '여성' && data.hairFemaleHormoneTestPreference) {
+        lines.push(`■ 여성 호르몬검사: ${data.hairFemaleHormoneTestPreference}`);
+      }
+      if (data.patientGender === '남성' && data.hairMalePsaTestPreference) {
+        lines.push(`■ PSA 검사: ${data.hairMalePsaTestPreference}`);
+      }
+    }
+
+    if (data.hairAdditionalNotes) {
+      lines.push(`■ 환자 추가 메모: ${data.hairAdditionalNotes}`);
+    }
+    lines.push('');
   }
 
   // --- [색소 분석] Pigment specific ---
