@@ -58,6 +58,14 @@ export const procedures: ProcedureInfo[] = [
     description: '모공 원인 분석 및 피부결 개선',
     color: '#0ea5e9',
   },
+  {
+    id: 'androgeneticAlopecia',
+    name: '안드로겐탈모(남성형탈모, 여성형탈모)',
+    nameEn: 'Pattern Hair Loss',
+    icon: '🧬',
+    description: '남성형·여성형 패턴탈모 초진 평가',
+    color: '#14b8a6',
+  },
 ];
 
 export const commonQuestions: Question[] = [
@@ -95,6 +103,7 @@ export const commonQuestions: Question[] = [
     type: 'yesno',
     warningOn: 'yes',
     warningMessage: '임신/수유 중',
+    visibleWhen: { field: 'patientGender', equals: '여성' },
     required: true,
   },
   {
@@ -590,6 +599,494 @@ export const acneQuestions: Question[] = [
   },
 ];
 
+export const androgeneticAlopeciaPatternQuestions: Question[] = [
+  {
+    id: 'hairOnset',
+    category: '안드로겐탈모',
+    text: '탈모 또는 모발 감소를 처음 느낀 시기는 언제인가요?',
+    type: 'radio',
+    options: [
+      { label: '3개월 이내', value: '3개월 이내' },
+      { label: '3~6개월 전', value: '3~6개월 전' },
+      { label: '6개월~1년 전', value: '6개월~1년 전' },
+      { label: '1~3년 전', value: '1~3년 전' },
+      { label: '3년 이상 전', value: '3년 이상 전' },
+      { label: '잘 모르겠음', value: '잘 모르겠음' },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairCourse',
+    category: '안드로겐탈모',
+    text: '지금까지의 진행 양상과 가장 가까운 것을 선택해 주세요.',
+    type: 'radio',
+    options: [
+      { label: '수개월~수년에 걸쳐 서서히 진행', value: '서서히 지속 진행' },
+      { label: '좋아졌다 나빠졌다를 반복', value: '간헐적 악화' },
+      { label: '최근 1~3개월 사이 갑자기 심해짐', value: '최근 급격히 악화' },
+      { label: '과거보다 큰 변화 없이 유지', value: '안정적' },
+      { label: '잘 모르겠음', value: '잘 모르겠음' },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairMainChange',
+    category: '안드로겐탈모',
+    text: '현재 가장 크게 느끼는 변화는 무엇인가요?',
+    subtext: '중복 선택할 수 있습니다.',
+    type: 'checkbox',
+    options: [
+      { label: '모발이 가늘어짐', value: '모발 가늘어짐' },
+      { label: '전체적인 숱 감소', value: '숱 감소' },
+      { label: '머리를 감거나 말릴 때 빠지는 양 증가', value: '빠지는 양 증가' },
+      { label: '두피가 더 많이 비쳐 보임', value: '두피 노출 증가' },
+      { label: '헤어라인이 뒤로 밀림', value: '헤어라인 후퇴' },
+      { label: '잘 모르겠음', value: '잘 모르겠음', exclusive: true },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairPattern',
+    category: '안드로겐탈모',
+    text: '어느 부위의 변화가 가장 두드러지나요?',
+    subtext: '중복 선택할 수 있습니다. 동전 모양 탈모나 통증·딱지가 있으면 다른 탈모가 함께 있는지 확인합니다.',
+    type: 'checkbox',
+    options: [
+      { label: '이마 양쪽 M자·관자 부위', value: 'M자/관자' },
+      { label: '앞머리선 전체', value: '앞머리선' },
+      { label: '정수리·가마 부위', value: '정수리/가마' },
+      { label: '가르마가 넓어지고 중앙 두피가 비침', value: '중앙 가르마' },
+      { label: '머리 전체가 고르게 얇아짐', value: '전체 확산성' },
+      { label: '동전 모양 또는 군데군데 비는 부위', value: '국소 반점형', warning: true },
+      { label: '잘 모르겠음', value: '잘 모르겠음', exclusive: true },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairShedding',
+    category: '안드로겐탈모',
+    text: '최근 빠지는 머리카락의 양은 어떻습니까?',
+    type: 'radio',
+    options: [
+      { label: '평소와 비슷함', value: '증가 없음' },
+      { label: '조금 늘었지만 일상에서 크게 느껴지지는 않음', value: '중등도 증가' },
+      { label: '샴푸·배수구·베개에서 확연히 많이 보임', value: '심한 증가' },
+      { label: '잘 모르겠음', value: '잘 모르겠음' },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairFamilyHistory',
+    category: '안드로겐탈모',
+    text: '가족 중 남성형 또는 여성형 탈모가 있나요?',
+    subtext: '가족력이 없어도 안드로겐탈모는 생길 수 있습니다.',
+    type: 'checkbox',
+    options: [
+      { label: '아버지 또는 친가 쪽', value: '부계' },
+      { label: '어머니 또는 외가 쪽', value: '모계' },
+      { label: '형제·자매', value: '형제자매' },
+      { label: '가족력 없음', value: '가족력 없음', exclusive: true },
+      { label: '잘 모르겠음', value: '잘 모르겠음', exclusive: true },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairScalpSymptoms',
+    category: '두피 증상',
+    text: '두피에 함께 나타나는 증상을 모두 선택해 주세요.',
+    type: 'checkbox',
+    options: [
+      { label: '가려움', value: '가려움' },
+      { label: '비듬·각질', value: '비듬/각질' },
+      { label: '붉음·염증·뾰루지', value: '붉음/염증/뾰루지', warning: true },
+      { label: '통증·화끈거림·머리카락이 당기는 느낌', value: '통증/화끈거림', warning: true },
+      { label: '딱지·진물·상처', value: '딱지/진물/상처', warning: true },
+      { label: '특별한 증상 없음', value: '증상 없음', exclusive: true },
+    ],
+    required: true,
+  },
+];
+
+export const androgeneticAlopeciaDifferentialQuestions: Question[] = [
+  {
+    id: 'hairRecentTriggers',
+    category: '악화 요인',
+    text: '탈모가 심해지기 전 2~6개월 사이에 해당한 일을 모두 선택해 주세요.',
+    subtext: '이런 변화 뒤에는 안드로겐탈모와 별도로 휴지기탈모가 겹칠 수 있습니다.',
+    type: 'checkbox',
+    options: [
+      { label: '고열·코로나19 등 심한 감염', value: '고열/감염' },
+      { label: '수술·입원·큰 사고', value: '수술/입원/사고' },
+      { label: '출산·유산', value: '출산/유산' },
+      { label: '체중 5kg 이상 감소·강한 다이어트', value: '급격한 체중감소' },
+      { label: '위고비·마운자로 등 체중감량 치료 중 빠른 감량', value: 'GLP-1 치료/빠른 감량' },
+      { label: '심한 스트레스·수면 부족', value: '스트레스/수면부족' },
+      { label: '새로 시작하거나 중단한 약·호르몬제', value: '약물/호르몬 변화' },
+      { label: '해당 사항 없음', value: '해당 없음', exclusive: true },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairNutritionRisk',
+    category: '영양·철결핍 위험',
+    text: '식사 또는 영양 상태와 관련해 해당하는 내용을 선택해 주세요.',
+    type: 'checkbox',
+    options: [
+      { label: '엄격한 채식 또는 육류를 거의 먹지 않음', value: '엄격한 채식/저육식' },
+      { label: '하루 섭취량을 크게 줄이는 식단', value: '제한 식이' },
+      { label: '섭식장애 또는 반복적인 극단 다이어트', value: '섭식장애/극단 다이어트' },
+      { label: '위·장 수술 또는 만성 흡수장애', value: '흡수장애 위험' },
+      { label: '쉽게 피곤함·숨참·창백함', value: '빈혈 의심 증상' },
+      { label: '해당 사항 없음', value: '해당 없음', exclusive: true },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairMedicalHistory',
+    category: '동반 질환',
+    text: '진단받았거나 치료 중인 질환을 모두 선택해 주세요.',
+    type: 'checkbox',
+    options: [
+      { label: '빈혈 또는 철결핍', value: '빈혈/철결핍' },
+      { label: '갑상선질환', value: '갑상선질환' },
+      { label: '다낭성난소증후군(PCOS)', value: 'PCOS' },
+      { label: '자가면역질환', value: '자가면역질환' },
+      { label: '만성 간·신장질환', value: '만성 간/신장질환' },
+      { label: '암 치료 또는 항암치료 이력', value: '암/항암치료' },
+      { label: '해당 사항 없음', value: '해당 없음', exclusive: true },
+      { label: '기타', value: '기타' },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairPreviousTreatment',
+    category: '이전 치료',
+    text: '이전에 받아본 탈모 치료를 모두 선택해 주세요.',
+    type: 'checkbox',
+    options: [
+      { label: '바르는 미녹시딜', value: '바르는 미녹시딜' },
+      { label: '먹는 미녹시딜', value: '먹는 미녹시딜' },
+      { label: '피나스테리드·두타스테리드', value: '피나스테리드/두타스테리드' },
+      { label: '스피로노락톤 등 항안드로겐 치료', value: '항안드로겐 치료' },
+      { label: 'PRP·주사·레이저·두피 시술', value: '주사/레이저/두피시술' },
+      { label: '모발이식', value: '모발이식' },
+      { label: '치료한 적 없음', value: '치료 없음', exclusive: true },
+      { label: '기타', value: '기타' },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairPreviousTreatmentDetail',
+    category: '이전 치료',
+    text: '치료 기간, 효과, 중단 이유 또는 부작용을 적어 주세요.',
+    subtext: '예: 피나스테리드 1년 복용, 효과 있었으나 성욕 저하로 중단',
+    type: 'text',
+    visibleWhen: {
+      field: 'hairPreviousTreatment',
+      includesAny: [
+        '바르는 미녹시딜',
+        '먹는 미녹시딜',
+        '피나스테리드/두타스테리드',
+        '항안드로겐 치료',
+        '주사/레이저/두피시술',
+        '모발이식',
+        '기타',
+      ],
+    },
+    required: false,
+  },
+];
+
+export const androgeneticAlopeciaSexAndTreatmentQuestions: Question[] = [
+  {
+    id: 'hairFemaleCycle',
+    category: '여성 탈모',
+    text: '현재 생리·완경 상태와 가장 가까운 것을 선택해 주세요.',
+    type: 'radio',
+    visibleWhen: { field: 'patientGender', equals: '여성' },
+    options: [
+      { label: '주기가 대체로 규칙적임', value: '규칙적' },
+      { label: '주기가 불규칙하거나 35일보다 긴 경우가 많음', value: '불규칙/희발월경' },
+      { label: '3개월 이상 생리가 없음(임신 제외)', value: '무월경' },
+      { label: '완경함', value: '완경' },
+      { label: '임신·수유 중', value: '임신/수유' },
+      { label: '자궁 수술 등으로 판단하기 어려움', value: '판단 어려움' },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairFemaleHeavyMenses',
+    category: '여성 탈모',
+    text: '생리량이 매우 많거나 생리 기간이 7일 이상 지속되는 편인가요?',
+    subtext: '과다월경은 철결핍 위험을 높일 수 있습니다. 완경·임신·무월경이면 "아니오"를 선택해 주세요.',
+    type: 'yesno',
+    visibleWhen: { field: 'patientGender', equals: '여성' },
+    required: true,
+  },
+  {
+    id: 'hairFemaleAndrogenSigns',
+    category: '여성 탈모',
+    text: '호르몬 이상 가능성을 확인하기 위해 해당 증상을 선택해 주세요.',
+    subtext: '여성형탈모만으로 남성호르몬이 높다고 단정할 수는 없습니다.',
+    type: 'checkbox',
+    visibleWhen: { field: 'patientGender', equals: '여성' },
+    options: [
+      { label: '턱·인중·가슴·배 등에 굵은 털이 늘어남', value: '다모증' },
+      { label: '성인 여드름이 심하거나 갑자기 악화', value: '중증/급격한 여드름' },
+      { label: '임신이 잘 되지 않거나 PCOS 진단', value: '난임/PCOS' },
+      { label: '탈모·다모증이 갑자기 빠르게 진행', value: '급격한 안드로겐 증상', warning: true },
+      { label: '목소리가 굵어짐·근육 증가 등 남성화 변화', value: '남성화 변화', warning: true },
+      { label: '해당 사항 없음', value: '해당 없음', exclusive: true },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairFemaleHormoneUse',
+    category: '여성 탈모',
+    text: '피임약·호르몬 치료제·난임 치료제를 사용 중이거나 최근 중단했나요?',
+    subtext: '호르몬제는 검사 결과에 영향을 주므로 약 이름과 중단 시점을 의료진에게 알려주세요.',
+    type: 'yesno',
+    visibleWhen: { field: 'patientGender', equals: '여성' },
+    warningOn: 'yes',
+    warningMessage: '여성 호르몬제 사용/최근 중단 - 호르몬검사 시기 확인',
+    required: true,
+  },
+  {
+    id: 'hairFemalePregnancyPlan',
+    category: '여성 탈모',
+    text: '현재 임신 가능성 또는 1년 이내 임신 계획이 있나요?',
+    subtext: '임신 가능성에 따라 사용할 수 없는 먹는 탈모약이 있습니다.',
+    type: 'yesno',
+    visibleWhen: { field: 'patientGender', equals: '여성' },
+    warningOn: 'yes',
+    warningMessage: '임신 가능성/1년 내 계획 있음 - 전신 탈모약 선택 주의',
+    required: true,
+  },
+  {
+    id: 'hairMaleAndrogenUse',
+    category: '남성 탈모',
+    text: '테스토스테론·남성호르몬·아나볼릭 스테로이드 또는 근육증가 약물을 사용하나요?',
+    type: 'yesno',
+    visibleWhen: { field: 'patientGender', equals: '남성' },
+    warningOn: 'yes',
+    warningMessage: '남성호르몬/아나볼릭 스테로이드 사용',
+    required: true,
+  },
+  {
+    id: 'hairMale45Plus',
+    category: '남성 탈모',
+    text: '현재 만 45세 이상인가요?',
+    subtext: '45세 이상에서 피나스테리드 치료를 논의할 때 전립선 상태와 PSA 기준치를 함께 확인할 수 있습니다.',
+    type: 'yesno',
+    visibleWhen: { field: 'patientGender', equals: '남성' },
+    required: true,
+  },
+  {
+    id: 'hairMaleProstateStatus',
+    category: '남성 탈모',
+    text: '최근 전립선 진료 또는 PSA 혈액검사 상태를 선택해 주세요.',
+    type: 'radio',
+    visibleWhen: [
+      { field: 'patientGender', equals: '남성' },
+      { field: 'hairMale45Plus', equals: 'yes' },
+    ],
+    options: [
+      { label: '최근 1년 이내 검사했고 이상 없었음', value: '1년 내 PSA 정상' },
+      { label: '검사한 적 없음', value: 'PSA 검사 없음' },
+      { label: '전립선 질환으로 진료 중', value: '전립선 진료 중' },
+      { label: '잘 모르겠음', value: '잘 모르겠음' },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairTreatmentSafety',
+    category: '치료 안전 확인',
+    text: '먹는 미녹시딜 등 치료 선택에 영향을 줄 수 있는 항목을 모두 선택해 주세요.',
+    type: 'checkbox',
+    options: [
+      { label: '저혈압·어지럼·실신', value: '저혈압/실신' },
+      { label: '부정맥·심부전·심장질환', value: '심장질환' },
+      { label: '다리·얼굴이 잘 붓는 편', value: '부종' },
+      { label: '신장질환', value: '신장질환' },
+      { label: '관련 질환 없음', value: '관련 질환 없음', exclusive: true },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairTreatmentGoal',
+    category: '치료 목표',
+    text: '이번 진료에서 가장 원하는 도움을 선택해 주세요.',
+    subtext: '중복 선택할 수 있습니다.',
+    type: 'checkbox',
+    options: [
+      { label: '정확한 진단과 원인 확인', value: '진단/원인 확인' },
+      { label: '더 진행하지 않도록 유지', value: '진행 억제' },
+      { label: '모발 굵기·밀도 개선', value: '굵기/밀도 개선' },
+      { label: '먹는 약·바르는 약 상담', value: '약물 상담' },
+      { label: '주사·레이저·시술 상담', value: '시술 상담' },
+      { label: '부작용이 가장 걱정됨', value: '부작용 상담' },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairAdditionalNotes',
+    category: '추가 내용',
+    text: '탈모와 관련해 의료진에게 꼭 알리고 싶은 내용이 있으면 적어 주세요.',
+    type: 'text',
+    required: false,
+  },
+];
+
+export const androgeneticAlopeciaBloodTestQuestions: Question[] = [
+  {
+    id: 'hairBloodTestInfo',
+    category: '초진 혈액검사 안내',
+    text: '혈액검사는 안드로겐탈모를 확진하는 검사가 아닙니다.',
+    subtext: '탈모 진단은 문진·두피 진찰·확대경검사가 중심이며, 혈액검사는 함께 교정할 수 있는 원인이 의심될 때 선택합니다.',
+    type: 'info',
+    infoItems: [
+      {
+        title: '혈구검사(CBC)',
+        description: '헤모글로빈과 적혈구 지표를 확인해 빈혈이 있는지 봅니다. 피로·숨참·창백함 또는 과다월경이 있을 때 도움이 됩니다.',
+        badge: '선별',
+      },
+      {
+        title: '페리틴 + 철/TIBC(또는 트랜스페린 포화도)',
+        description: '몸에 저장된 철과 실제 철 이용 상태를 확인합니다. 빠지는 양이 갑자기 늘었거나 과다월경·제한식·빠른 체중감량이 있을 때 특히 고려합니다.',
+        badge: '선별',
+      },
+      {
+        title: 'TSH(필요시 free T4)',
+        description: '갑상선 기능 저하나 항진은 머리 전체가 빠지는 원인이 될 수 있어, 확산성 탈모나 갑상선 증상이 있으면 확인합니다.',
+        badge: '선별',
+      },
+      {
+        title: '25-OH 비타민 D',
+        description: '결핍 여부를 확인합니다. 패턴탈모와의 인과관계는 확실하지 않아 모든 환자에게 필수 검사는 아니며, 결핍 위험과 전신 건강을 함께 고려합니다.',
+        badge: '선택',
+      },
+      {
+        title: '아연',
+        description: '엄격한 제한식, 흡수장애, 영양결핍 위험이 있을 때 선택합니다. 증상이 없는 모든 환자에게 일률적으로 검사할 근거는 제한적입니다.',
+        badge: '선택',
+      },
+    ],
+    required: false,
+  },
+  {
+    id: 'hairFemaleBloodTestInfo',
+    category: '여성 호르몬검사 안내',
+    text: '여성 호르몬검사는 증상이 있을 때 선별적으로 시행합니다.',
+    subtext: '생리불순·무월경·다모증·난임·심한 성인여드름·급격한 진행이 있으면 고안드로겐혈증이나 PCOS 등을 확인합니다.',
+    type: 'info',
+    visibleWhen: { field: 'patientGender', equals: '여성' },
+    infoItems: [
+      {
+        title: '총 테스토스테론 + SHBG(계산 유리안드로겐지수/유리 테스토스테론)',
+        description: '고안드로겐혈증을 선별하는 중심 검사입니다. 피임약 등 호르몬제는 결과에 영향을 주므로 검사 시기를 의료진이 조정합니다.',
+        badge: '증상 있을 때',
+      },
+      {
+        title: 'DHEA-S·프로락틴 및 추가 내분비검사',
+        description: '첫 검사와 증상에 따라 부신 안드로겐·고프로락틴혈증을 확인하고, 필요하면 17-OH 프로게스테론·코르티솔 등을 추가합니다.',
+        badge: '의사 판단',
+      },
+    ],
+    required: false,
+  },
+  {
+    id: 'hairMaleBloodTestInfo',
+    category: '남성 검사 안내',
+    text: '전형적인 남성형탈모는 보통 호르몬 혈액검사가 필요하지 않습니다.',
+    subtext: '다른 질환이 의심될 때만 원인 검사를 선택합니다. PSA는 탈모 진단검사가 아니라 피나스테리드 치료 전 전립선 기준치 확인을 위해 상담할 수 있습니다.',
+    type: 'info',
+    visibleWhen: { field: 'patientGender', equals: '남성' },
+    infoItems: [
+      {
+        title: 'PSA(전립선특이항원)',
+        description: '특히 45세 이상에서 피나스테리드 치료를 고려할 때 최근 전립선 진료와 기준치를 확인할 수 있습니다. 피나스테리드는 PSA 수치를 낮추므로 향후 검사 시 복용 사실을 알려야 합니다.',
+        badge: '치료 전 상담',
+      },
+    ],
+    required: false,
+  },
+  {
+    id: 'hairBloodTestPreference',
+    category: '초진 혈액검사',
+    text: '이번 초진에서 혈액검사를 원하시나요?',
+    subtext: '최종 검사 항목은 답변과 진찰 결과를 보고 의료진과 함께 결정합니다.',
+    type: 'radio',
+    options: [
+      { label: '검사를 원합니다', value: '검사 희망' },
+      { label: '원장님 설명을 들은 뒤 결정하겠습니다', value: '설명 후 결정' },
+      { label: '이번에는 원하지 않습니다', value: '검사 원치 않음' },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairBloodTestItems',
+    category: '희망 검사 범위',
+    text: '설명을 보고 관심 있는 검사 항목을 선택해 주세요.',
+    subtext: '선택은 검사 주문이 아니라 상담 희망 표시입니다. 불필요한 검사를 줄이기 위해 의료진이 최종 조정합니다.',
+    type: 'checkbox',
+    visibleWhen: { field: 'hairBloodTestPreference', equals: '검사 희망' },
+    options: [
+      { label: '혈구검사(CBC) — 빈혈 확인', value: 'CBC' },
+      { label: '페리틴 + 철/TIBC(또는 포화도) — 철결핍 확인', value: '페리틴/철대사' },
+      { label: 'TSH(필요시 free T4) — 갑상선 확인', value: '갑상선' },
+      { label: '25-OH 비타민 D — 결핍 확인', value: '비타민 D' },
+      { label: '아연 — 영양결핍 위험 시', value: '아연' },
+      { label: '진찰 후 원장님이 필요한 항목을 정해주세요', value: '의료진 선택', exclusive: true },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairFemaleHormoneTestPreference',
+    category: '여성 호르몬검사',
+    text: '여성 호르몬 선별검사도 상담받고 싶으신가요?',
+    subtext: '총 테스토스테론·SHBG/유리안드로겐지수를 우선 고려하고, DHEA-S·프로락틴 등은 증상과 결과에 따라 결정합니다.',
+    type: 'radio',
+    visibleWhen: [
+      { field: 'patientGender', equals: '여성' },
+      { field: 'hairBloodTestPreference', equals: '검사 희망' },
+      {
+        field: 'hairFemaleAndrogenSigns',
+        includesAny: ['다모증', '중증/급격한 여드름', '난임/PCOS', '급격한 안드로겐 증상', '남성화 변화'],
+      },
+    ],
+    options: [
+      { label: '호르몬검사 상담을 원합니다', value: '호르몬검사 상담 희망' },
+      { label: '원장님 설명 후 결정하겠습니다', value: '설명 후 결정' },
+      { label: '원하지 않습니다', value: '원치 않음' },
+    ],
+    required: true,
+  },
+  {
+    id: 'hairMalePsaTestPreference',
+    category: '남성 치료 전 검사',
+    text: '피나스테리드 치료를 논의할 경우 PSA 검사도 상담받고 싶으신가요?',
+    type: 'radio',
+    visibleWhen: [
+      { field: 'patientGender', equals: '남성' },
+      { field: 'hairMale45Plus', equals: 'yes' },
+      { field: 'hairBloodTestPreference', equals: '검사 희망' },
+    ],
+    options: [
+      { label: 'PSA 검사 상담을 원합니다', value: 'PSA 상담 희망' },
+      { label: '최근 검사 결과를 먼저 확인하겠습니다', value: '최근 결과 확인' },
+      { label: '원장님 설명 후 결정하겠습니다', value: '설명 후 결정' },
+    ],
+    required: true,
+  },
+];
+
+export const androgeneticAlopeciaQuestions: Question[] = [
+  ...androgeneticAlopeciaPatternQuestions,
+  ...androgeneticAlopeciaDifferentialQuestions,
+  ...androgeneticAlopeciaSexAndTreatmentQuestions,
+  ...androgeneticAlopeciaBloodTestQuestions,
+];
+
 export const bddqQuestions: Question[] = [
   {
     id: 'bddq1',
@@ -746,15 +1243,35 @@ export function getStepsForProcedure(
 ): SurveyStep[] {
   const steps: SurveyStep[] = [];
   const proceduresArray = procedure.split(',').map(p => p.trim());
+  const isHairOnly =
+    proceduresArray.length === 1 && proceduresArray[0] === 'androgeneticAlopecia';
+  const hasNonHairProcedure = proceduresArray.some(
+    (item) => item !== 'androgeneticAlopecia'
+  );
   const shouldAskCirs =
     isCirsApplicableProcedure(procedure) &&
     (!skipCommon || !reuseCompletedCirs);
 
   if (!skipCommon) {
+    const hairCommonQuestionIds = new Set([
+      'patientName',
+      'patientGender',
+      'patientPhoneLast',
+      'pregnancy',
+      'medications',
+      'medicationDetail',
+      'allergyOther',
+      'allergyDetail',
+    ]);
+
     steps.push({
       title: '기본 건강 정보',
-      subtitle: '안전한 시술을 위한 기본 확인사항입니다',
-      questions: commonQuestions,
+      subtitle: isHairOnly
+        ? '정확한 초진 평가와 치료 안전을 위한 기본 확인사항입니다'
+        : '안전한 시술을 위한 기본 확인사항입니다',
+      questions: isHairOnly
+        ? commonQuestions.filter((question) => hairCommonQuestionIds.has(question.id))
+        : commonQuestions,
     });
   }
 
@@ -797,6 +1314,30 @@ export function getStepsForProcedure(
           subtitle: '여드름의 원인 분석 및 맞춤 치료를 위한 추가 정보입니다',
           questions: acneQuestions,
         });
+        break;
+      case 'androgeneticAlopecia':
+        steps.push(
+          {
+            title: '안드로겐탈모 양상 확인',
+            subtitle: '남성형·여성형 패턴과 다른 탈모가 함께 있는지 확인합니다',
+            questions: androgeneticAlopeciaPatternQuestions,
+          },
+          {
+            title: '동반 원인·악화 요인 확인',
+            subtitle: '휴지기탈모, 철결핍, 갑상선질환 등 교정 가능한 요인을 확인합니다',
+            questions: androgeneticAlopeciaDifferentialQuestions,
+          },
+          {
+            title: '성별·치료 안전 확인',
+            subtitle: '성별에 맞는 호르몬 신호와 안전한 치료 선택을 확인합니다',
+            questions: androgeneticAlopeciaSexAndTreatmentQuestions,
+          },
+          {
+            title: '초진 혈액검사 선택',
+            subtitle: '검사별 목적과 근거를 읽고 검사 희망 여부를 선택해 주세요',
+            questions: androgeneticAlopeciaBloodTestQuestions,
+          }
+        );
         break;
       case 'scar':
         hasScar = true;
@@ -1187,7 +1728,7 @@ export function getStepsForProcedure(
     });
   }
 
-  if (!skipCommon) {
+  if (!skipCommon && hasNonHairProcedure) {
     steps.push({
       title: '피부 상태 확인',
       subtitle: '정확한 진단을 위한 피부 정보 확인입니다',

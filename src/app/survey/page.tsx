@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getStepsForProcedure } from '@/data/questionData';
 import { SurveyFormData, ProcedureType } from '@/types/types';
 import { hasCompleteCirsResponses } from '@/utils/cirs';
+import { isQuestionVisible } from '@/utils/questionVisibility';
 import ProgressBar from '@/components/ProgressBar';
 import QuestionCard from '@/components/QuestionCard';
 import NavButtons from '@/components/NavButtons';
@@ -55,6 +56,34 @@ function SurveyContent() {
       acneType: '',
       acneLifestyle: '',
       acneHormone: '',
+      acneTreatmentPreference: '',
+      hairOnset: '',
+      hairCourse: '',
+      hairMainChange: '',
+      hairPattern: '',
+      hairShedding: '',
+      hairFamilyHistory: '',
+      hairScalpSymptoms: '',
+      hairRecentTriggers: '',
+      hairNutritionRisk: '',
+      hairMedicalHistory: '',
+      hairPreviousTreatment: '',
+      hairPreviousTreatmentDetail: '',
+      hairFemaleCycle: '',
+      hairFemaleHormoneUse: '',
+      hairFemaleAndrogenSigns: '',
+      hairFemalePregnancyPlan: '',
+      hairFemaleHeavyMenses: '',
+      hairMaleAndrogenUse: '',
+      hairMale45Plus: '',
+      hairMaleProstateStatus: '',
+      hairTreatmentSafety: '',
+      hairTreatmentGoal: '',
+      hairBloodTestPreference: '',
+      hairBloodTestItems: '',
+      hairFemaleHormoneTestPreference: '',
+      hairMalePsaTestPreference: '',
+      hairAdditionalNotes: '',
       scarCause: '',
       scarDuration: '',
       scarPosasPain: '',
@@ -104,6 +133,23 @@ function SurveyContent() {
 
   const steps = getStepsForProcedure(procedure, skipCommon, formValues, reuseCompletedCirs);
   const currentQuestions = steps[currentStep]?.questions || [];
+
+  const isVisibleQuestion = useCallback(
+    (question: (typeof currentQuestions)[number], data: SurveyFormData) => {
+      if (!isQuestionVisible(question, data)) return false;
+      if (question.id === 'medicationDetail' && data.medications !== 'yes') return false;
+      if (question.id === 'allergyDetail' && data.allergyOther !== 'yes') return false;
+      if (question.id === 'metalImplantDetail' && data.metalImplant !== 'yes') return false;
+      if (question.id === 'botoxRecentPlace' && data.botoxRecent !== 'yes') return false;
+      if (question.id === 'botoxRecentArea' && data.botoxRecent !== 'yes') return false;
+      if (question.id === 'botoxResistanceProduct' && data.botoxResistance !== 'yes') return false;
+      if (question.id === 'fillerPreviousPlace' && data.fillerPrevious !== 'yes') return false;
+      if (question.id === 'fillerLastDate' && data.fillerPrevious !== 'yes') return false;
+      if (question.id === 'fillerLastArea' && data.fillerPrevious !== 'yes') return false;
+      return true;
+    },
+    []
+  );
 
   const handleFieldChange = useCallback(
     (fieldId: string, value: string) => {
@@ -160,18 +206,9 @@ function SurveyContent() {
   const handleNext = useCallback(() => {
     // Validate required fields in current step
     const data = getValues();
-    const visibleQuestions = currentQuestions.filter(q => {
-      if (q.id === 'medicationDetail' && data.medications !== 'yes') return false;
-      if (q.id === 'allergyDetail' && data.allergyOther !== 'yes') return false;
-      if (q.id === 'metalImplantDetail' && data.metalImplant !== 'yes') return false;
-      if (q.id === 'botoxRecentPlace' && data.botoxRecent !== 'yes') return false;
-      if (q.id === 'botoxRecentArea' && data.botoxRecent !== 'yes') return false;
-      if (q.id === 'botoxResistanceProduct' && data.botoxResistance !== 'yes') return false;
-      if (q.id === 'fillerPreviousPlace' && data.fillerPrevious !== 'yes') return false;
-      if (q.id === 'fillerLastDate' && data.fillerPrevious !== 'yes') return false;
-      if (q.id === 'fillerLastArea' && data.fillerPrevious !== 'yes') return false;
-      return true;
-    });
+    const visibleQuestions = currentQuestions.filter((question) =>
+      isVisibleQuestion(question, data)
+    );
 
     const missing = visibleQuestions
       .filter(q => q.required && !data[q.id]?.trim())
@@ -216,7 +253,7 @@ function SurveyContent() {
 
       router.push('/result');
     }
-  }, [currentStep, steps.length, transitionTo, getValues, router, currentQuestions]);
+  }, [currentStep, steps.length, transitionTo, getValues, router, currentQuestions, isVisibleQuestion]);
 
   const handlePrev = useCallback(() => {
     if (currentStep > 0) {
@@ -294,15 +331,7 @@ function SurveyContent() {
             animate="show"
           >
             {currentQuestions.map((question) => {
-              if (question.id === 'medicationDetail' && formValues.medications !== 'yes') return null;
-              if (question.id === 'allergyDetail' && formValues.allergyOther !== 'yes') return null;
-              if (question.id === 'metalImplantDetail' && formValues.metalImplant !== 'yes') return null;
-              if (question.id === 'botoxRecentPlace' && formValues.botoxRecent !== 'yes') return null;
-              if (question.id === 'botoxRecentArea' && formValues.botoxRecent !== 'yes') return null;
-              if (question.id === 'botoxResistanceProduct' && formValues.botoxResistance !== 'yes') return null;
-              if (question.id === 'fillerPreviousPlace' && formValues.fillerPrevious !== 'yes') return null;
-              if (question.id === 'fillerLastDate' && formValues.fillerPrevious !== 'yes') return null;
-              if (question.id === 'fillerLastArea' && formValues.fillerPrevious !== 'yes') return null;
+              if (!isVisibleQuestion(question, formValues)) return null;
 
               return (
                 <motion.div

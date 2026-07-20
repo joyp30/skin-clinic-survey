@@ -71,7 +71,7 @@ export default function Home() {
         </div>
         <div className="trust-badge">
           <Clock size={18} />
-          <span>약 3분 소요</span>
+          <span>약 3~7분 소요</span>
         </div>
       </motion.div>
 

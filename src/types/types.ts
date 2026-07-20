@@ -1,4 +1,12 @@
-export type ProcedureType = 'botox' | 'filler' | 'pigment' | 'lifting' | 'acne' | 'scar' | 'pore';
+export type ProcedureType =
+  | 'botox'
+  | 'filler'
+  | 'pigment'
+  | 'lifting'
+  | 'acne'
+  | 'scar'
+  | 'pore'
+  | 'androgeneticAlopecia';
 
 export interface ProcedureInfo {
   id: ProcedureType;
@@ -13,6 +21,20 @@ export interface QuestionOption {
   label: string;
   value: string;
   warning?: boolean;
+  exclusive?: boolean;
+}
+
+export interface QuestionVisibilityRule {
+  field: string;
+  equals?: string;
+  notEquals?: string;
+  includesAny?: string[];
+}
+
+export interface QuestionInfoItem {
+  title: string;
+  description: string;
+  badge?: string;
 }
 
 export interface Question {
@@ -20,8 +42,10 @@ export interface Question {
   category: string;
   text: string;
   subtext?: string;
-  type: 'yesno' | 'radio' | 'checkbox' | 'text' | 'scale';
+  type: 'yesno' | 'radio' | 'checkbox' | 'text' | 'scale' | 'info';
   options?: QuestionOption[];
+  infoItems?: QuestionInfoItem[];
+  visibleWhen?: QuestionVisibilityRule | QuestionVisibilityRule[];
   warningOn?: string; // value that triggers a warning
   warningMessage?: string;
   popupMessage?: string; // real-time alert message shown directly in UI
@@ -82,6 +106,35 @@ export interface SurveyFormData {
   acneLifestyle: string;
   acneHormone: string;
   acneTreatmentPreference: string;
+
+  // Androgenetic alopecia specific
+  hairOnset: string;
+  hairCourse: string;
+  hairMainChange: string;
+  hairPattern: string;
+  hairShedding: string;
+  hairFamilyHistory: string;
+  hairScalpSymptoms: string;
+  hairRecentTriggers: string;
+  hairNutritionRisk: string;
+  hairMedicalHistory: string;
+  hairPreviousTreatment: string;
+  hairPreviousTreatmentDetail: string;
+  hairFemaleCycle: string;
+  hairFemaleHormoneUse: string;
+  hairFemaleAndrogenSigns: string;
+  hairFemalePregnancyPlan: string;
+  hairFemaleHeavyMenses: string;
+  hairMaleAndrogenUse: string;
+  hairMale45Plus: string;
+  hairMaleProstateStatus: string;
+  hairTreatmentSafety: string;
+  hairTreatmentGoal: string;
+  hairBloodTestPreference: string;
+  hairBloodTestItems: string;
+  hairFemaleHormoneTestPreference: string;
+  hairMalePsaTestPreference: string;
+  hairAdditionalNotes: string;
 
   // Scar specific
   scarCause: string;
