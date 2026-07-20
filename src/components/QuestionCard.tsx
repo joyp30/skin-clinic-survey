@@ -154,13 +154,33 @@ export default function QuestionCard({
                         if (isSelected) {
                           newValues = newValues.filter((v) => !v.startsWith('기타'));
                         } else {
+                          const exclusiveValues = new Set(
+                            question.options
+                              ?.filter((item) => item.exclusive)
+                              .map((item) => item.value) || []
+                          );
+                          newValues = newValues.filter(
+                            (selected) => !exclusiveValues.has(selected)
+                          );
                           newValues.push(customText ? `기타(${customText})` : '기타');
                         }
                       } else {
                         if (isSelected) {
                           newValues = newValues.filter((v) => v !== option.value);
                         } else {
-                          newValues.push(option.value);
+                          if (option.exclusive) {
+                            newValues = [option.value];
+                          } else {
+                            const exclusiveValues = new Set(
+                              question.options
+                                ?.filter((item) => item.exclusive)
+                                .map((item) => item.value) || []
+                            );
+                            newValues = newValues.filter(
+                              (selected) => !exclusiveValues.has(selected)
+                            );
+                            newValues.push(option.value);
+                          }
                         }
                       }
                       onChange(newValues.join(', '));
@@ -216,6 +236,20 @@ export default function QuestionCard({
               >
                 {n}
               </button>
+            ))}
+          </div>
+        )}
+
+        {question.type === 'info' && (
+          <div className="question-info-list">
+            {question.infoItems?.map((item) => (
+              <div className="question-info-item" key={item.title}>
+                <div className="question-info-title-row">
+                  <strong>{item.title}</strong>
+                  {item.badge && <span className="question-info-badge">{item.badge}</span>}
+                </div>
+                <p>{item.description}</p>
+              </div>
             ))}
           </div>
         )}
